@@ -1,0 +1,12 @@
+# Target build directory
+target/
+
+# IDE files
+.idea/
+*.iml
+.classpath
+.project
+.settings/
+
+# macOS files
+.DS_Store
