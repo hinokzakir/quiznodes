@@ -5,9 +5,9 @@ import com.quiznodes.server.types.Quiz;
 
 import java.util.HashMap;
 
-public class serverBackend {
+public class ServerBackend {
     HashMap<String, Quiz> quizzes;
-    public serverBackend() {}
+    public ServerBackend() {}
     public void addQuiz(String name, Quiz quiz){
         quizzes.put(name, quiz);
     }

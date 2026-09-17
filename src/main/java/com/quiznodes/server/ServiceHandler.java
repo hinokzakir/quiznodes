@@ -4,7 +4,7 @@ import com.quiznodes.proto.*;
 
 import io.grpc.stub.StreamObserver;
 
-public class serviceHandler extends serviceHandlerGrpc.serviceHandlerImplBase {
+public class ServiceHandler extends serviceHandlerGrpc.serviceHandlerImplBase {
     @Override
     public void testService(testMessage request, StreamObserver<testMessage> responseObserver) {
 

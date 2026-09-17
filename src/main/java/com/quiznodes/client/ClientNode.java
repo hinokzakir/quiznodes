@@ -6,11 +6,11 @@ import com.quiznodes.proto.testMessage;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 
-public class clientNode {
+public class ClientNode {
     private final ManagedChannel channel;
     private final serviceHandlerGrpc.serviceHandlerBlockingStub blockingStub;
 
-    public clientNode(String host, int port) {
+    public ClientNode(String host, int port) {
         // set up connection to server
         this.channel = ManagedChannelBuilder.forAddress(host, port).usePlaintext().build();
         // client side stub
