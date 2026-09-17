@@ -4,6 +4,7 @@ import com.quiznodes.server.types.Question;
 import com.quiznodes.server.types.Quiz;
 
 import java.util.HashMap;
+import java.util.List;
 
 public class ServerBackend {
     HashMap<String, Quiz> quizzes;
@@ -11,8 +12,8 @@ public class ServerBackend {
     public void addQuiz(String name, Quiz quiz){
         quizzes.put(name, quiz);
     }
-    public void addQuestionToQuiz(String name, String question, String answer){
-        quizzes.get(name).addQuestion(new Question(question, answer));
+    public void addQuestionToQuiz(String name, String question, String answer, List<String> choices){
+        quizzes.get(name).addQuestion(new Question(question, answer, choices));
     }
     public Quiz getQuiz(String name){
         return quizzes.get(name);

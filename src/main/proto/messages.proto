@@ -14,16 +14,16 @@ message testMessage {
     string msg = 1;
 }
 
-messaage question {
+message question {
     string id = 1;
     string question = 2;
     string correctAnswer = 3;
-    repeated string Choices = 4;
+    repeated string choices = 4;
 }
 
 message quiz {
     string id = 1;
-    repeated question = 2;    
+    repeated question questions = 2;    
 }
 
 message quizId {
