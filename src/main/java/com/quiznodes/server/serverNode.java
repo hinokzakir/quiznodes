@@ -9,7 +9,9 @@ public class serverNode {
 
     public serverNode(int port) {
         this.port = port;
-        this.server = ServerBuilder.forPort(port).build();
+        this.server = ServerBuilder.forPort(port)
+                .addService(new serviceHandler())
+                .build();
     }
 
     public static void main(String[] args) throws Exception {

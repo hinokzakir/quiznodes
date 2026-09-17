@@ -14,10 +14,21 @@ mvn clean install
 mvn clean package
 ```
 
-3. To run
+3.1. To run main
 ```bash
 mvn exec:java -Dexec.mainClass="com.quiznodes.Main"
 ```
+or
+```bash
+mvn exec:java
+```
+
+3.2.
+```bash
+mvn exec:java -Dexec.mainClass="com.quiznodes.server.serverNode"
+```
+
+
 
 4. To run tests
 ```bash

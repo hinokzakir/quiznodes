@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package messenger;
+
+option java_package = "com.quiznodes.proto";
+option java_multiple_files = true;
+
+service serviceHandler {
+    rpc testService (testMessage) returns (testMessage);
+}
+
+message testMessage {
+    string msg = 1;
+}
