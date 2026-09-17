@@ -1,22 +1,30 @@
 package com.quiznodes.server.types;
 
 import java.util.UUID;
+import java.util.List;
 
 public class Question {
     private String id;
     private final String question;
-    private final String answer;
-    public Question(String question, String answer) {
+    private final String correctAnswer;
+    private List<String> choices;
+
+    public Question(String question, String correctAnswer, List<String> choices) {
         this.id = UUID.randomUUID().toString();
         this.question = question;
-        this.answer = answer;
+        this.correctAnswer = correctAnswer;
+
     }
     public String getQuestion() {
         return question;
     }
 
-    public String getAnswer() {
-        return answer;
+    public String getCorrectAnswer() {
+        return correctAnswer;
+    }
+
+    public List<String> getChoices() {
+        return choices;
     }
 
     public String getId() {
