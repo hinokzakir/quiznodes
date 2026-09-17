@@ -18,4 +18,8 @@ public class Question {
     public String getAnswer() {
         return answer;
     }
+
+    public String getId() {
+        return id;
+    }
 }
