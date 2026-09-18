@@ -13,8 +13,9 @@ public class Question {
         this.id = UUID.randomUUID().toString();
         this.question = question;
         this.correctAnswer = correctAnswer;
-
+        this.choices = choices;
     }
+
     public String getQuestion() {
         return question;
     }

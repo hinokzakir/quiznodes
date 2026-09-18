@@ -6,11 +6,13 @@ import io.grpc.ServerBuilder;
 public class ServerNode {
     private int port;
     private Server server;
+    private ServerBackend backend;
 
     public ServerNode(int port) {
         this.port = port;
+        this.backend = new ServerBackend();
         this.server = ServerBuilder.forPort(port)
-                .addService(new ServiceHandler())
+                .addService(new ServiceHandler(backend))
                 .build();
     }
 
