@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package messenger;
+
+option java_package = "com.quiznodes.proto";
+option java_multiple_files = true;
+
+service serviceHandler {
+  rpc replicateQuiz(quizMessage) returns (empty);
+}
+
+message questionMessage {
+  string id = 1;
+  string question = 2;
+  string correctAnswer = 3;
+  repeated string choices = 4;
+}
+
+message quizMessage {
+  string id = 1;
+  repeated questionMessage questions = 2;
+}
+
+message quizId {
+  string id = 1;
+}
+
+message empty{
+
+}
