@@ -9,10 +9,10 @@ import com.quiznodes.server.types.*;
 import io.grpc.stub.StreamObserver;
 
 public class ServiceHandler extends serviceHandlerGrpc.serviceHandlerImplBase {
-    private final ServerBackend backend;
+    private final Manager manager;
 
-    public ServiceHandler(ServerBackend backend) {
-        this.backend = backend;
+    public ServiceHandler(Manager manager) {
+        this.manager = manager;
     }
 
     @Override
@@ -27,7 +27,7 @@ public class ServiceHandler extends serviceHandlerGrpc.serviceHandlerImplBase {
     public void getQuiz(quizId request, StreamObserver<quizMessage> responseObserver) {
         String id = request.getId().toString();
 
-        Quiz quiz = backend.getQuiz(id);
+        Quiz quiz = manager.getQuiz(id);
 
         quizMessage.Builder builder = quizMessage.newBuilder().setId(quiz.getId());
 
@@ -63,7 +63,7 @@ public class ServiceHandler extends serviceHandlerGrpc.serviceHandlerImplBase {
             Question q = new Question(qid, correct, choices);
             quiz.addQuestion(q);
         }
-        backend.addQuiz(quizIdString, quiz);
+        manager.addQuiz(quizIdString, quiz);
 
         quizId.Builder builder = quizId.newBuilder().setId(quiz.getId());
         responseObserver.onNext(builder.build());

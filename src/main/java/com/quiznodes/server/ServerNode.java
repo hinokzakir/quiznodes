@@ -8,16 +8,19 @@ public class ServerNode {
     private Server server;
     private ServerBackend backend;
 
-    public ServerNode(int port) {
-        this.port = port;
+    public ServerNode(int port, Manager manager) {
         this.backend = new ServerBackend();
         this.server = ServerBuilder.forPort(port)
-                .addService(new ServiceHandler(backend))
+                .addService(new ServiceHandler(manager))
+                .addService(new ServerToServerHandler(manager))
                 .build();
     }
 
     public void start() throws Exception {
         server.start();
+        port = server.getPort();
+        System.out.println("Server started, listening on " + port);
+        server.awaitTermination();
     }
 
     public void stop() {
@@ -26,11 +29,10 @@ public class ServerNode {
         }
     }
 
-    public static void main(String[] args) throws Exception {
-        int port = 50051;
+    /*public static void main(String[] args) throws Exception {
+        int port = 0;
         ServerNode server = new ServerNode(port);
         server.start();
-        System.out.println("Server started on port " + port);
         server.server.awaitTermination();
-    }
+    }*/
 }
