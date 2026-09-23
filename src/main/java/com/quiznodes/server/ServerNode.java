@@ -16,10 +16,20 @@ public class ServerNode {
                 .build();
     }
 
+    public void start() throws Exception {
+        server.start();
+    }
+
+    public void stop() {
+        if (server != null) {
+            server.shutdown();
+        }
+    }
+
     public static void main(String[] args) throws Exception {
         int port = 50051;
         ServerNode server = new ServerNode(port);
-        server.server.start();
+        server.start();
         System.out.println("Server started on port " + port);
         server.server.awaitTermination();
     }

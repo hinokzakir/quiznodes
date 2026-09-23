@@ -14,10 +14,23 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <grpc.version>1.62.2</grpc.version>
         <junit.jupiter.version>5.10.2</junit.jupiter.version>
-        <exec.mainClass>com.quiznodes.Main</exec.mainClass>
+        <javafx.version>21.0.2</javafx.version>
+        <exec.mainClass>com.quiznodes.App</exec.mainClass>
     </properties>
 
     <dependencies>
+        <!-- JavaFX Dependencies -->
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-controls</artifactId>
+            <version>${javafx.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-fxml</artifactId>
+            <version>${javafx.version}</version>
+        </dependency>
+
         <!-- gRPC Dependencies -->
         <dependency>
             <groupId>io.grpc</groupId>
