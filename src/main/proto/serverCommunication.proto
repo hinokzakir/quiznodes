@@ -7,7 +7,5 @@ option java_package = "com.quiznodes.proto";
 option java_multiple_files = true;
 
 service serverToServerCommunication {
-  rpc replicateQuiz(quizMessage) returns (empty);
+  rpc replicateQuiz(quizMessage) returns (Empty);
 }
-
-message empty{}

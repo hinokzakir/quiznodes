@@ -52,7 +52,7 @@ public class ServiceHandler extends serviceHandlerGrpc.serviceHandlerImplBase {
 
     @Override 
     public void getAllQuiz(Empty request, StreamObserver<quizList> responseObserver) {
-        List<Quiz> quizzes = backend.getAllQuizList();
+        List<Quiz> quizzes = manager.getAllQuizList();
 
         quizList.Builder response = quizList.newBuilder();
 

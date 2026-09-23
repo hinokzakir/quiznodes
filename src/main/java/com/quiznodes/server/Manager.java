@@ -34,10 +34,15 @@ public class Manager {
         servers.getFirst().replicateQuiz(quiz);
     }
 
-    public static void main(String[] args) throws Exception {
-        Manager manager = new Manager();
-    }
     public void stopServer(){
         server.stop();
+    }
+
+    public List<Quiz> getAllQuizList(){
+        return serverBackend.getAllQuizList();
+    }
+
+    public static void main(String[] args) throws Exception {
+        Manager manager = new Manager();
     }
 }

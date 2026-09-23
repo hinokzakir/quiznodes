@@ -1,7 +1,5 @@
 package com.quiznodes.server;
 
-import com.google.protobuf.Empty;
-import com.quiznodes.proto.empty;
 import com.quiznodes.proto.quizMessage;
 import com.quiznodes.proto.serverToServerCommunicationGrpc;
 import com.quiznodes.proto.*;
@@ -17,8 +15,9 @@ public class ServerToServerHandler extends serverToServerCommunicationGrpc.serve
     public ServerToServerHandler(Manager manager) {
         this.manager = manager;
     }
+
     @Override
-    public void replicateQuiz(quizMessage request, StreamObserver<empty> responseObserver) {
+    public void replicateQuiz(quizMessage request, StreamObserver<Empty> responseObserver) {
         List<Question> questions = new ArrayList<>();
         for(questionMessage q : request.getQuestionsList()){
             Question question = new Question(
@@ -31,7 +30,7 @@ public class ServerToServerHandler extends serverToServerCommunicationGrpc.serve
         manager.addQuiz(request.getId(), new Quiz(questions));
         System.out.println("Quiz has been added");
         System.out.println("Questions:" + questions);
-        responseObserver.onNext(empty.newBuilder().build());
+        responseObserver.onNext(Empty.newBuilder().build());
         responseObserver.onCompleted();
     }
 }
