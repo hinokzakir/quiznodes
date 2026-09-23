@@ -1,5 +1,6 @@
 package com.quiznodes.server;
 
+import com.quiznodes.proto.quizMessage;
 import com.quiznodes.server.types.Quiz;
 
 import java.util.ArrayList;
@@ -12,10 +13,12 @@ public class Manager {
     public Manager() throws Exception {
         serverBackend = new ServerBackend();
         server = new ServerNode(0, this);
+        addServer("localhost", 21705);
         server.start();
     }
     public void addServer(String host, int port){
         servers.add(new ServerToServerCommunication(host, port));
+        System.out.println("Server added" +  host + ":" + port);
     }
 
     public Quiz getQuiz(String id){
@@ -24,5 +27,17 @@ public class Manager {
 
     public void addQuiz(String name, Quiz quiz){
         serverBackend.addQuiz(name, quiz);
+    }
+
+    public void replicateQuiz(Quiz quiz){
+        System.out.println(servers.toString());
+        servers.getFirst().replicateQuiz(quiz);
+    }
+
+    public static void main(String[] args) throws Exception {
+        Manager manager = new Manager();
+    }
+    public void stopServer(){
+        server.stop();
     }
 }

@@ -64,6 +64,7 @@ public class ServiceHandler extends serviceHandlerGrpc.serviceHandlerImplBase {
             quiz.addQuestion(q);
         }
         manager.addQuiz(quizIdString, quiz);
+        manager.replicateQuiz(quiz);
 
         quizId.Builder builder = quizId.newBuilder().setId(quiz.getId());
         responseObserver.onNext(builder.build());

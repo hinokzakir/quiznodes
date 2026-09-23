@@ -20,7 +20,6 @@ public class ServerNode {
         server.start();
         port = server.getPort();
         System.out.println("Server started, listening on " + port);
-        server.awaitTermination();
     }
 
     public void stop() {
