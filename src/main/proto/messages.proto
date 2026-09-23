@@ -8,7 +8,12 @@ option java_multiple_files = true;
 service serviceHandler {
     rpc testService (testMessage) returns (testMessage);
     rpc getQuiz (quizId) returns (quizMessage);
+    rpc getAllQuiz (Empty) returns (quizList);
     rpc sendQuiz (quizMessage) returns (quizId);
+}
+
+message Empty {
+
 }
 
 message testMessage {
@@ -25,6 +30,10 @@ message questionMessage {
 message quizMessage {
     string id = 1;
     repeated questionMessage questions = 2;    
+}
+
+message quizList {
+    repeated quizMessage quizzes = 1;
 }
 
 message quizId {

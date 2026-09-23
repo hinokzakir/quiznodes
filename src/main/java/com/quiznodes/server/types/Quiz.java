@@ -31,4 +31,9 @@ public class Quiz {
     public List<Question> getQuestions() {
         return questions;
     }
+
+    @Override
+    public String toString() {
+        return "ID: " +this.id + " (" + questions.size() + " questions)";
+    }
 }

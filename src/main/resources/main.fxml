@@ -3,11 +3,12 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox alignment="TOP_CENTER" prefHeight="555.0" prefWidth="700.0" spacing="30.0" styleClass="root-pane" stylesheets="@style.css" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.quiznodes.NodeController">
+<VBox alignment="TOP_CENTER" prefHeight="555.0" prefWidth="950.0" spacing="30.0" styleClass="root-pane" stylesheets="@style.css" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.quiznodes.NodeController">
    
    <padding>
       <Insets bottom="40.0" left="40.0" right="40.0" top="40.0" />
@@ -76,6 +77,18 @@
                   </VBox>
                </children>
             </VBox>
+
+            <!-- Available Quizzes Card (Hidden by default) -->
+            <VBox fx:id="quizListCard" visible="false" managed="false" styleClass="card" HBox.hgrow="ALWAYS">
+               <children>
+                  <Label styleClass="card-title" text="Available Quizzes" />
+                  
+                  <!-- ListView to display the quizzes -->
+                  <ListView fx:id="quizListView" styleClass="dark-list-view" VBox.vgrow="ALWAYS" />
+                  
+               </children>
+            </VBox>
+            
          </children>
       </HBox>
    </children>
