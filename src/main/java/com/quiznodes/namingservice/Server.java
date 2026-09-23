@@ -48,6 +48,9 @@ public class Server implements NameService {
             
             System.out.println("====== QuizNode Server Node Namingservice ======");
             System.out.println("Listening on port: " + port);
+
+            // Keep main thread alive so RMI server remains active in terminal
+            Thread.currentThread().join();
         } catch (Exception e) {
             System.err.println("Server initialization failed: " + e.getMessage());
             e.printStackTrace();

@@ -62,6 +62,12 @@ public class ServerNode {
         }
     }
 
+    public void awaitTermination() throws InterruptedException {
+        if (server != null) {
+            server.awaitTermination();
+        }
+    }
+
     /*public static void main(String[] args) throws Exception {
         int port = 0;
         ServerNode server = new ServerNode(port);

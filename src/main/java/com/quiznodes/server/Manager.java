@@ -38,10 +38,15 @@ public class Manager {
         server.stop();
     }
 
+    public void blockUntilShutdown() throws InterruptedException {
+        if (server != null) {
+            server.awaitTermination();
+        }
+    }
+
     public List<Quiz> getAllQuizList(){
         return serverBackend.getAllQuizList();
     }
-
     public static void main(String[] args) throws Exception {
         Manager manager = new Manager(50051);
     }

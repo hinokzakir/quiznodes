@@ -14,19 +14,19 @@ mvn clean install
 mvn clean package
 ```
 
-3.1. To run main
+3.1. To run Client node (GUI)
 ```bash
-mvn exec:java -Dexec.mainClass="com.quiznodes.Main"
+mvn exec:java
 ```
 
-3.2.
+3.2. To run the serverApp
 ```bash
-mvn exec:java -Dexec.mainClass="com.quiznodes.server.serverNode"
+mvn exec:java -Dexec.mainClass="com.quiznodes.serverApp"
 ```
 
-4. To run the GUI.
+3.3. To run the naming service
 ```bash
-mvn compile exec:java
+mvn exec:java -Dexec.mainClass="com.quiznodes.namingservice.Server"
 ```
 
 

@@ -23,15 +23,6 @@ import java.util.List;
 public class NodeController {
 
     @FXML
-    private TextField serverPortField;
-
-    @FXML
-    private Button startServerBtn;
-
-    @FXML
-    private Label serverStatusLabel;
-
-    @FXML
     private TextField clientHostField;
 
     @FXML
@@ -55,60 +46,9 @@ public class NodeController {
     @FXML
     private Label clientStatusLabel;
 
-    private Manager activeServerManager;
     private ClientNode activeClient;
     private ScheduledExecutorService heartbeatScheduler;
     private List<Quiz> quizList;
-
-    @FXML
-    private void handleStartServer() {
-        if (activeServerManager != null) {
-            try {
-                activeServerManager.stopServer();
-            } catch (Exception e) {
-                System.err.println("Error stopping server: " + e.getMessage());
-            }
-            activeServerManager = null;
-            serverStatusLabel.setText("Status: Stopped");
-            startServerBtn.setText("Start Server");
-            serverPortField.setDisable(false);
-            return;
-        }
-
-        String portText = serverPortField.getText().trim();
-        int port;
-        try {
-            port = Integer.parseInt(portText);
-            if (port < 1 || port > 65535) {
-                serverStatusLabel.setText("Error: Port must be between 1 and 65535");
-                return;
-            }
-        } catch (NumberFormatException e) {
-            serverStatusLabel.setText("Error: Invalid port number format");
-            return;
-        }
-
-        serverStatusLabel.setText("Status: Starting server on port " + port + "...");
-        startServerBtn.setDisable(true);
-
-        CompletableFuture.runAsync(() -> {
-            try {
-                activeServerManager = new Manager(port);
-
-                Platform.runLater(() -> {
-                    serverStatusLabel.setText("Status: Running on port " + port);
-                    startServerBtn.setText("Stop Server");
-                    startServerBtn.setDisable(false);
-                    serverPortField.setDisable(true);
-                });
-            } catch (Exception e) {
-                Platform.runLater(() -> {
-                    serverStatusLabel.setText("Error: " + e.getMessage());
-                    startServerBtn.setDisable(false);
-                });
-            }
-        });
-    }
 
     @FXML
     private void handleConnectClient() {
@@ -301,9 +241,5 @@ public class NodeController {
 
     public ClientNode getActiveClient() {
         return activeClient;
-    }
-
-    public Manager getActiveServerManager() {
-        return activeServerManager;
     }
 }
