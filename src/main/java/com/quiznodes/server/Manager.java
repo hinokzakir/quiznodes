@@ -10,9 +10,9 @@ public class Manager {
     private ServerBackend serverBackend;
     private ServerNode server;
     private List<ServerToServerCommunication> servers = new ArrayList<>();
-    public Manager() throws Exception {
+    public Manager(int port) throws Exception {
         serverBackend = new ServerBackend();
-        server = new ServerNode(0, this);
+        server = new ServerNode(port, this);
         addServer("localhost", 21705);
         server.start();
     }
@@ -43,6 +43,6 @@ public class Manager {
     }
 
     public static void main(String[] args) throws Exception {
-        Manager manager = new Manager();
+        Manager manager = new Manager(50051);
     }
 }

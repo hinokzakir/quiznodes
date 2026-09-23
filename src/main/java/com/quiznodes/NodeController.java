@@ -93,7 +93,7 @@ public class NodeController {
 
         CompletableFuture.runAsync(() -> {
             try {
-                activeServerManager = new Manager();
+                activeServerManager = new Manager(port);
 
                 Platform.runLater(() -> {
                     serverStatusLabel.setText("Status: Running on port " + port);
