@@ -17,6 +17,10 @@ public class Quiz {
         questions = new ArrayList<>();
     }
 
+    public Quiz(List<Question> questions) {
+        this.questions = questions;
+    }
+
     public String getId() {
         return id;
     }
