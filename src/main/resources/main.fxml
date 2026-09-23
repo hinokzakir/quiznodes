@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox alignment="TOP_CENTER" prefHeight="555.0" prefWidth="700.0" spacing="30.0" styleClass="root-pane" stylesheets="@style.css" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.quiznodes.NodeController">
+   
+   <padding>
+      <Insets bottom="40.0" left="40.0" right="40.0" top="40.0" />
+   </padding>
+   
+   <children>
+      <Label styleClass="main-title" text="Quiznodes" />
+      
+      <HBox spacing="30.0" VBox.vgrow="ALWAYS">
+         <children>
+            <!-- Server Configuration Card -->
+            <VBox styleClass="card" HBox.hgrow="ALWAYS">
+               <children>
+                  <Label styleClass="card-title" text="Server Node" />
+                  
+                  <VBox spacing="8.0" styleClass="input-group">
+                     <children>
+                        <Label styleClass="field-label" text="Port Number" />
+                        <TextField fx:id="serverPortField" promptText="50051" text="50051" />
+                     </children>
+                  </VBox>
+                  
+                  <!-- Spacer to push controls to the bottom -->
+                  <VBox prefHeight="215.0" prefWidth="116.0" VBox.vgrow="ALWAYS">
+                     <children>
+                          <Button fx:id="startServerBtn" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleStartServer" styleClass="primary-button" text="Start Server" />
+                     </children></VBox>
+                  
+                  <VBox alignment="CENTER" spacing="10.0">
+                      <children>
+                          <Label fx:id="serverStatusLabel" styleClass="status-label" text="Status: Stopped" />
+                      </children>
+                  </VBox>
+               </children>
+            </VBox>
+
+            <!-- Client Configuration Card -->
+            <VBox prefHeight="375.0" prefWidth="295.0" styleClass="card" HBox.hgrow="ALWAYS">
+               <children>
+                  <Label styleClass="card-title" text="Client Node" />
+                  
+                  <VBox spacing="8.0" styleClass="input-group">
+                     <children>
+                        <Label styleClass="field-label" text="Host Address" />
+                        <TextField fx:id="clientHostField" promptText="localhost" text="localhost" />
+                     </children>
+                  </VBox>
+                  
+                  <VBox spacing="8.0" styleClass="input-group">
+                     <children>
+                        <Label styleClass="field-label" text="Port Number" />
+                        <TextField fx:id="clientPortField" promptText="50051" text="50051" />
+                          <Button fx:id="connectClientBtn" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleConnectClient" styleClass="primary-button" text="Connect Client" />
+                        <Button fx:id="sendQuizBtn" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleSendQuiz" prefHeight="42.0" prefWidth="112.0" styleClass="primary-button" text="Send Quiz" visible="false" managed="false" />
+                        <Button fx:id="getQuizBtn" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleGetQuiz" prefHeight="42.0" prefWidth="112.0" styleClass="primary-button" text="Get Quiz" visible="false" managed="false" />
+                     </children>
+                  </VBox>
+                  
+                  <!-- Spacer to push controls to the bottom -->
+                  <VBox VBox.vgrow="ALWAYS" />
+                  
+                  <VBox alignment="CENTER" spacing="10.0">
+                      <children>
+                          <Label fx:id="clientStatusLabel" styleClass="status-label" text="Status: Disconnected" />
+                      </children>
+                  </VBox>
+               </children>
+            </VBox>
+         </children>
+      </HBox>
+   </children>
+</VBox>

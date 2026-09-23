@@ -18,19 +18,20 @@ mvn clean package
 ```bash
 mvn exec:java -Dexec.mainClass="com.quiznodes.Main"
 ```
-or
-```bash
-mvn exec:java
-```
 
 3.2.
 ```bash
 mvn exec:java -Dexec.mainClass="com.quiznodes.server.serverNode"
 ```
 
+4. To run the GUI.
+```bash
+mvn compile exec:java
+```
 
 
-4. To run tests
+
+5. To run tests
 ```bash
 mvn test
 ```
