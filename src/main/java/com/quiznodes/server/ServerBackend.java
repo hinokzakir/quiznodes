@@ -3,6 +3,7 @@ package com.quiznodes.server;
 import com.quiznodes.server.types.Question;
 import com.quiznodes.server.types.Quiz;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -24,6 +25,10 @@ public class ServerBackend {
     public Quiz getQuiz(String name) {
         return quizzes.get(name);
     }
+
+    public List<Quiz> getAllQuizList() {
+        return new ArrayList<>(quizzes.values());
+    } 
 
     public void deleteQuiz(String name) {
         quizzes.remove(name);

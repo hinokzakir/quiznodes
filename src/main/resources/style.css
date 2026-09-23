@@ -91,3 +91,42 @@
     -fx-translate-y: 2;
     /* Pressed animation */
 }
+
+/* --- ListView (Dark Theme for Quizzes) --- */
+.dark-list-view {
+    -fx-background-color: #292D39; /* Matches text fields */
+    -fx-border-color: transparent;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-padding: 5;
+}
+
+/* Individual list items */
+.dark-list-view .list-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: #F8FAFC;
+    -fx-padding: 10 15 10 15;
+    -fx-font-size: 14px;
+}
+
+/* Hover effect on list items */
+.dark-list-view .list-cell:filled:hover {
+    -fx-background-color: #2D3242;
+    -fx-background-radius: 5;
+}
+
+/* Selected item highlight */
+.dark-list-view .list-cell:filled:selected {
+    -fx-background-color: #6366F1; /* Indigo Accent */
+    -fx-text-fill: #FFFFFF;
+    -fx-background-radius: 5;
+}
+
+/* Clean up the scrollbar */
+.dark-list-view .scroll-bar:vertical {
+    -fx-background-color: transparent;
+}
+.dark-list-view .scroll-bar:vertical .thumb {
+    -fx-background-color: #475569;
+    -fx-background-radius: 5;
+}

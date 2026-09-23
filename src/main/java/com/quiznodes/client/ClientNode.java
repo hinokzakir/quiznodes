@@ -1,9 +1,12 @@
 package com.quiznodes.client;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import com.quiznodes.proto.Empty;
 import com.quiznodes.proto.questionMessage;
 import com.quiznodes.proto.quizId;
+import com.quiznodes.proto.quizList;
 import com.quiznodes.proto.quizMessage;
 import com.quiznodes.proto.serviceHandlerGrpc;
 import com.quiznodes.proto.testMessage;
@@ -88,5 +91,33 @@ public class ClientNode {
         }
 
         return null;
+    }
+
+    public List<Quiz> getAllQuiz() {
+        try {
+            Empty request = Empty.newBuilder().build();
+            quizList response = blockingStub.getAllQuiz(request); 
+            
+            List<Quiz> quizzes = new ArrayList<>();
+            for (quizMessage qMsg : response.getQuizzesList()) {
+                Quiz quiz = new Quiz(qMsg.getId());
+                for (questionMessage qm : qMsg.getQuestionsList()) {
+                    Question question = new Question(qm.getId(), qm.getCorrectAnswer(), qm.getChoicesList());
+                    quiz.addQuestion(question);
+                }
+                quizzes.add(quiz);
+            }
+            return quizzes;
+        } catch (Exception e) {
+            System.err.println("ERROR: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public void shutdown() {
+        if (channel != null && !channel.isShutdown()) {
+            channel.shutdown();
+        }
     }
 }

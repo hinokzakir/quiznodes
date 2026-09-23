@@ -4,16 +4,20 @@ import com.quiznodes.server.types.*;
 
 import com.quiznodes.client.ClientNode;
 import com.quiznodes.server.ServerNode;
+import javafx.collections.FXCollections;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.control.ListView;
+import javafx.scene.layout.VBox;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.List;
 
 public class NodeController {
 
@@ -42,11 +46,18 @@ public class NodeController {
     private Button getQuizBtn;
 
     @FXML
+    private VBox quizListCard;
+
+    @FXML
+    private ListView<Quiz> quizListView;
+
+    @FXML
     private Label clientStatusLabel;
 
     private ServerNode activeServer;
     private ClientNode activeClient;
     private ScheduledExecutorService heartbeatScheduler;
+    private List<Quiz> quizList;
 
     @FXML
     private void handleStartServer() {
@@ -132,10 +143,18 @@ public class NodeController {
 
                 if (response != null && !response.isEmpty()) {
                     activeClient = clientNode;
+                    List<Quiz> fetchedQuizzes = clientNode.getAllQuiz();
+                    this.quizList = fetchedQuizzes;
+
                     Platform.runLater(() -> {
                         clientStatusLabel.setText("Status: Connected (" + response + ")");
                         connectClientBtn.setDisable(false);
                         setServiceButtonsVisible(true);
+                        
+                        if (quizListView != null && fetchedQuizzes != null) {
+                            quizListView.setItems(FXCollections.observableArrayList(fetchedQuizzes));
+                        }
+                        setListVisible(true);
                     });
                     startHeartbeat();
                 } else {
@@ -143,6 +162,7 @@ public class NodeController {
                         clientStatusLabel.setText("Error: No response from server");
                         connectClientBtn.setDisable(false);
                         setServiceButtonsVisible(false);
+                        setListVisible(false);
                     });
                 }
             } catch (Exception e) {
@@ -150,6 +170,7 @@ public class NodeController {
                     clientStatusLabel.setText("Error: " + (e.getMessage() != null ? e.getMessage() : "Connection failed"));
                     connectClientBtn.setDisable(false);
                     setServiceButtonsVisible(false);
+                    setListVisible(false);
                 });
             }
         });
@@ -215,6 +236,16 @@ public class NodeController {
                 String response = activeClient.testRequestString("ping");
                 if (response == null || response.isEmpty()) {
                     handleConnectionLost("Connection Lost (Server Offline)");
+                } else {
+                    List<Quiz> updatedQuizzes = activeClient.getAllQuiz();
+                    if (updatedQuizzes != null) {
+                        this.quizList = updatedQuizzes;
+                        Platform.runLater(() -> {
+                            if (quizListView != null) {
+                                quizListView.setItems(FXCollections.observableArrayList(updatedQuizzes));
+                            }
+                        });
+                    }
                 }
             } catch (Exception e) {
                 handleConnectionLost("Connection Lost (Server Offline)");
@@ -231,11 +262,23 @@ public class NodeController {
 
     private void handleConnectionLost(String message) {
         stopHeartbeat();
-        activeClient = null;
+        if (activeClient != null) {
+            try {
+                activeClient.shutdown();
+            } catch (Exception ignored) {}
+            activeClient = null;
+        }
         Platform.runLater(() -> {
             clientStatusLabel.setText("Status: " + message);
             connectClientBtn.setDisable(false);
             setServiceButtonsVisible(false);
+            setListVisible(false);
+            if (quizList != null) {
+                quizList.clear();
+            }
+            if (quizListView != null) {
+                quizListView.getItems().clear();
+            }
         });
     }
 
@@ -247,6 +290,13 @@ public class NodeController {
         if (getQuizBtn != null) {
             getQuizBtn.setVisible(visible);
             getQuizBtn.setManaged(visible);
+        }
+    }
+
+    private void setListVisible(boolean visible) {
+        if (quizListCard != null){
+            quizListCard.setVisible(visible);
+            quizListCard.setManaged(visible);
         }
     }
 

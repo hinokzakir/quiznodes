@@ -50,6 +50,30 @@ public class ServiceHandler extends serviceHandlerGrpc.serviceHandlerImplBase {
         responseObserver.onCompleted();
     }
 
+    @Override 
+    public void getAllQuiz(Empty request, StreamObserver<quizList> responseObserver) {
+        List<Quiz> quizzes = backend.getAllQuizList();
+
+        quizList.Builder response = quizList.newBuilder();
+
+        for(Quiz q : quizzes) {
+            quizMessage.Builder quiz = quizMessage.newBuilder();
+            quiz.setId(q.getId());
+            for(Question question : q.getQuestions()){
+                questionMessage questionmessage = questionMessage.newBuilder()
+                    .addAllChoices(question.getChoices())
+                    .setCorrectAnswer(question.getCorrectAnswer())
+                    .setId(question.getId())
+                    .build();
+                
+                quiz.addQuestions(questionmessage);
+            }   
+            response.addQuizzes(quiz.build());
+        }
+        responseObserver.onNext(response.build());
+        responseObserver.onCompleted();
+    }
+
     @Override
     public void sendQuiz(quizMessage request, StreamObserver<quizId> responseObserver) {
         int count = request.getQuestionsCount();
