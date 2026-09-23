@@ -14,6 +14,7 @@ public class ServerBackend {
         quizzes = new HashMap<>();
     }
 
+
     public void addQuiz(String name, Quiz quiz) {
         quizzes.put(name, quiz);
     }

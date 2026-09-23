@@ -1,5 +1,6 @@
 package com.quiznodes;
 
+import com.quiznodes.server.Manager;
 import com.quiznodes.server.types.*;
 
 import com.quiznodes.client.ClientNode;
@@ -54,20 +55,20 @@ public class NodeController {
     @FXML
     private Label clientStatusLabel;
 
-    private ServerNode activeServer;
+    private Manager activeServerManager;
     private ClientNode activeClient;
     private ScheduledExecutorService heartbeatScheduler;
     private List<Quiz> quizList;
 
     @FXML
     private void handleStartServer() {
-        if (activeServer != null) {
+        if (activeServerManager != null) {
             try {
-                activeServer.stop();
+                activeServerManager.stopServer();
             } catch (Exception e) {
                 System.err.println("Error stopping server: " + e.getMessage());
             }
-            activeServer = null;
+            activeServerManager = null;
             serverStatusLabel.setText("Status: Stopped");
             startServerBtn.setText("Start Server");
             serverPortField.setDisable(false);
@@ -92,9 +93,7 @@ public class NodeController {
 
         CompletableFuture.runAsync(() -> {
             try {
-                ServerNode serverNode = new ServerNode(port);
-                serverNode.start();
-                activeServer = serverNode;
+                activeServerManager = new Manager();
 
                 Platform.runLater(() -> {
                     serverStatusLabel.setText("Status: Running on port " + port);
@@ -304,7 +303,7 @@ public class NodeController {
         return activeClient;
     }
 
-    public ServerNode getActiveServer() {
-        return activeServer;
+    public Manager getActiveServerManager() {
+        return activeServerManager;
     }
 }
