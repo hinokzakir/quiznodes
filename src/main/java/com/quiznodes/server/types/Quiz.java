@@ -17,8 +17,9 @@ public class Quiz {
         questions = new ArrayList<>();
     }
 
-    public Quiz(List<Question> questions) {
+    public Quiz(String id, List<Question> questions) {
         this.questions = questions;
+        this.id = id;
     }
 
     public String getId() {

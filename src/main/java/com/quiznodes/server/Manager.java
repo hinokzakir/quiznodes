@@ -4,6 +4,7 @@ import com.quiznodes.proto.quizMessage;
 import com.quiznodes.server.types.NodeInfo;
 import com.quiznodes.server.types.Quiz;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -15,6 +16,7 @@ public class Manager {
     private List<ServerToServerCommunication> servers = new ArrayList<>();
     private List<Long> capacities = new ArrayList<>();
     private Set<Integer> fullServers = new HashSet<>();
+    private Map<String, Integer> quizToServerMap = new HashMap<>();
     private final ScheduledExecutorService heartbeatScheduler =
             Executors.newSingleThreadScheduledExecutor();
     public Manager(int port, int max_capacity, boolean isLeader) throws Exception {
@@ -32,6 +34,19 @@ public class Manager {
         servers.add(new ServerToServerCommunication(host, port));
         capacities.add(0L);
         System.out.println("Server added" +  host + ":" + port);
+    }
+
+    public void startNewServer() throws IOException {
+        ProcessBuilder processBuilder = new ProcessBuilder(
+                "java",
+                "-cp",
+                System.getProperty("java.class.path"),
+                "com.quiznodes.ServerApp"
+        );
+
+        processBuilder.inheritIO();
+
+        Process process = processBuilder.start();
     }
 
     public Quiz getQuiz(String id){
@@ -65,6 +80,7 @@ public class Manager {
 
         for(int i = 0; i < replicationFactor; i++){
             long capacity = servers.get(indices[i]).replicateQuiz(quiz);
+            quizToServerMap.put(quiz.getId(), indices[i]);
             if (capacity < 1){
                 fullServers.add(indices[i]);
             }
@@ -85,18 +101,29 @@ public class Manager {
         heartbeatScheduler.scheduleAtFixedRate(
                 this::sendLeaderHeartbeat,
                 0,
-                5,
+                10,
                 TimeUnit.SECONDS
         );
     }
 
     public void sendLeaderHeartbeat(){
+        double total_capacity = 0;
+        double total_max_capacity = 100 * servers.size();
         for (int i = 0; i < servers.size(); i++) {
             ServerToServerCommunication serverToServerCommunication = servers.get(i);
             long capacity = serverToServerCommunication.sendLeaderHeartbeat();
             capacities.set(i,capacity);
+            total_capacity += capacity;
         }
         System.out.println("Capacities: " + capacities);
+        if(total_capacity/total_max_capacity < 0.2){
+            try {
+                startNewServer();
+                addServer("localhost", 2224);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 
     public List<Quiz> getAllQuizList(){
@@ -105,6 +132,12 @@ public class Manager {
 
     public long getServerCapacity(){
         return serverBackend.getCapacity();
+    }
+
+    public quizMessage getQuizFromCorrectServer(String id){
+        System.out.println(quizToServerMap.get(id));
+        ServerToServerCommunication serverToServerCommunication = servers.get(quizToServerMap.get(id));
+        return serverToServerCommunication.getQuiz(id);
     }
 
     public static void main(String[] args) throws Exception {

@@ -25,28 +25,8 @@ public class ServiceHandler extends serviceHandlerGrpc.serviceHandlerImplBase {
 
     @Override
     public void getQuiz(quizId request, StreamObserver<quizMessage> responseObserver) {
-        String id = request.getId().toString();
-
-        Quiz quiz = manager.getQuiz(id);
-
-        quizMessage.Builder builder = quizMessage.newBuilder().setId(quiz.getId());
-
-        List<Question> questions = quiz.getQuestions();
-
-        for (Question question : questions) {
-            questionMessage.Builder q = questionMessage.newBuilder()
-                    .setId(question.getId())
-                    .setQuestion(question.getQuestion())
-                    .setCorrectAnswer(question.getCorrectAnswer());
-
-            for (String choice : question.getChoices()) {
-                q.addChoices(choice);
-            }
-
-            q.build();
-            builder.addQuestions(q);
-        }
-        responseObserver.onNext(builder.build());
+        quizMessage response = manager.getQuizFromCorrectServer(request.getId());
+        responseObserver.onNext(response);
         responseObserver.onCompleted();
     }
 

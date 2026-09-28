@@ -27,9 +27,7 @@ public class ServerToServerHandler extends serverToServerCommunicationGrpc.serve
             );
             questions.add(question);
         }
-        manager.addQuiz(request.getId(), new Quiz(questions));
-        System.out.println("Quiz has been added");
-        System.out.println("Questions:" + questions);
+        manager.addQuiz(request.getId(), new Quiz(request.getId(),questions));
         long capacity = manager.getServerCapacity();
         responseObserver.onNext(replicateResponse.newBuilder().setAvailableCapacity(capacity).build());
         responseObserver.onCompleted();
@@ -40,6 +38,34 @@ public class ServerToServerHandler extends serverToServerCommunicationGrpc.serve
         long capacity = manager.getServerCapacity();
         System.out.println("Received Heartbeat");
         responseObserver.onNext(heartbeatResponse.newBuilder().setAvailableCapacity(capacity).build());
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void getQuiz(quizId request, StreamObserver<quizMessage> responseObserver) {
+        String id = request.getId();
+
+        Quiz quiz = manager.getQuiz(id);
+        System.out.println("Quiz: " + quiz);
+
+        quizMessage.Builder builder = quizMessage.newBuilder().setId(quiz.getId());
+
+        List<Question> questions = quiz.getQuestions();
+
+        for (Question question : questions) {
+            questionMessage.Builder q = questionMessage.newBuilder()
+                    .setId(question.getId())
+                    .setQuestion(question.getQuestion())
+                    .setCorrectAnswer(question.getCorrectAnswer());
+
+            for (String choice : question.getChoices()) {
+                q.addChoices(choice);
+            }
+
+            q.build();
+            builder.addQuestions(q);
+        }
+        responseObserver.onNext(builder.build());
         responseObserver.onCompleted();
     }
 }

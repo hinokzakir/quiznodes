@@ -9,6 +9,7 @@ option java_multiple_files = true;
 service serverToServerCommunication {
   rpc replicateQuiz(quizMessage) returns (replicateResponse);
   rpc sendLeaderHeartbeat(Empty) returns (heartbeatResponse);
+  rpc getQuiz (quizId) returns (quizMessage);
 }
 
 message heartbeatResponse{

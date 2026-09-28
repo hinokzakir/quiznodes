@@ -11,6 +11,7 @@ import java.util.List;
 
 public class ServerToServerCommunication {
     private serverToServerCommunicationGrpc.serverToServerCommunicationBlockingStub stub;
+
     public ServerToServerCommunication(String host, int port) {
         ManagedChannel channel = ManagedChannelBuilder.forAddress(host, port).usePlaintext().build();
         stub = serverToServerCommunicationGrpc.newBlockingStub(channel);
@@ -40,9 +41,14 @@ public class ServerToServerCommunication {
         }
     }
 
-    public long sendLeaderHeartbeat(){
+    public long sendLeaderHeartbeat() {
         heartbeatResponse response = stub.sendLeaderHeartbeat(Empty.newBuilder().build());
         System.out.println("Got Capacity:" + response.getAvailableCapacity());
         return response.getAvailableCapacity();
+    }
+
+    public quizMessage getQuiz(String id) {
+        quizId request = quizId.newBuilder().setId(id).build();
+        return stub.getQuiz(request);
     }
 }
