@@ -5,6 +5,7 @@ import com.quiznodes.server.types.NodeInfo;
 import com.quiznodes.server.types.Quiz;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -43,13 +44,25 @@ public class Manager {
     }
 
     public void replicateQuiz(Quiz quiz){
-        int maxServerIndex = 0;
-        for(int i = 0; i < capacities.size(); i++){
-            if(capacities.get(i) > capacities.get(maxServerIndex)){
-                maxServerIndex = i;
-            }
+        int replicationFactor;
+        int nrServers = servers.size();
+        if(nrServers == 1){
+            replicationFactor = 1;
+        } else if(nrServers < 4){
+            replicationFactor = 2;
+        } else {
+            replicationFactor = 3;
         }
-        servers.get(maxServerIndex).replicateQuiz(quiz);
+        Integer[] indices = new Integer[capacities.size()];
+        for(int i = 0; i < capacities.size(); i++){
+            indices[i] = i;
+        }
+
+        Arrays.sort(indices, (a, b) -> Long.compare(capacities.get(b), capacities.get(a)));
+
+        for(int i = 0; i < replicationFactor; i++){
+            servers.get(indices[i]).replicateQuiz(quiz);
+        }
     }
 
     public void stopServer(){
