@@ -10,7 +10,6 @@ public class ServerNode {
     private int port;
     private String name;
     private Server server;
-    private ServerBackend backend;
     private NameServiceHandler nameServiceHandler;
     private NameService nameService;
 
@@ -19,7 +18,6 @@ public class ServerNode {
         this.ip = "localhost";
         this.port = port;
         this.name = ip + ":" + port;
-        this.backend = new ServerBackend();
         this.server = ServerBuilder.forPort(port)
                 .addService(new ServiceHandler(manager))
                 .addService(new ServerToServerHandler(manager))

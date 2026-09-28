@@ -5,7 +5,7 @@ import com.quiznodes.server.types.Quiz;
 
 public class Main {
     public static void main(String[] args) {
-        ClientNode client = new ClientNode("localhost", 50051);
+        ClientNode client = new ClientNode("localhost", 2221);
         String response = client.testRequestString("FAAAAHHHH");
         System.out.println(response);
 

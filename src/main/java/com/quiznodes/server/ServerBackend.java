@@ -1,5 +1,6 @@
 package com.quiznodes.server;
 
+import com.quiznodes.server.types.NodeInfo;
 import com.quiznodes.server.types.Question;
 import com.quiznodes.server.types.Quiz;
 
@@ -9,9 +10,11 @@ import java.util.List;
 
 public class ServerBackend {
     private HashMap<String, Quiz> quizzes;
+    private NodeInfo nodeInfo;
 
-    public ServerBackend() {
+    public ServerBackend(int max_capacity) {
         quizzes = new HashMap<>();
+        nodeInfo = new NodeInfo(max_capacity);
     }
 
 
