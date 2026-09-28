@@ -33,4 +33,12 @@ public class ServerToServerHandler extends serverToServerCommunicationGrpc.serve
         responseObserver.onNext(Empty.newBuilder().build());
         responseObserver.onCompleted();
     }
+
+    @Override
+    public void sendLeaderHeartbeat(Empty request, StreamObserver<heartbeatResponse> responseObserver) {
+        long capacity = manager.getServerCapacity();
+        System.out.println("Received Heartbeat");
+        responseObserver.onNext(heartbeatResponse.newBuilder().setAvailableCapacity(capacity).build());
+        responseObserver.onCompleted();
+    }
 }

@@ -1,9 +1,7 @@
 package com.quiznodes.server;
 
-import com.quiznodes.proto.questionMessage;
-import com.quiznodes.proto.quizId;
-import com.quiznodes.proto.quizMessage;
-import com.quiznodes.proto.serverToServerCommunicationGrpc;
+import com.google.rpc.context.AttributeContext;
+import com.quiznodes.proto.*;
 import com.quiznodes.server.types.Question;
 import com.quiznodes.server.types.Quiz;
 import io.grpc.ManagedChannel;
@@ -40,5 +38,11 @@ public class ServerToServerCommunication {
             System.err.println("ERROR: " + e.getMessage());
             e.printStackTrace();
         }
+    }
+
+    public long sendLeaderHeartbeat(){
+        heartbeatResponse response = stub.sendLeaderHeartbeat(Empty.newBuilder().build());
+        System.out.println("Got Capacity:" + response.getAvailableCapacity());
+        return response.getAvailableCapacity();
     }
 }

@@ -20,6 +20,7 @@ public class ServerBackend {
 
     public void addQuiz(String name, Quiz quiz) {
         quizzes.put(name, quiz);
+        nodeInfo.quizAdded();
     }
 
     public void addQuestionToQuiz(String name, String question, String answer, List<String> choices) {
@@ -36,5 +37,9 @@ public class ServerBackend {
 
     public void deleteQuiz(String name) {
         quizzes.remove(name);
+    }
+
+    public long getCapacity() {
+        return nodeInfo.getCapacity();
     }
 }
