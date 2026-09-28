@@ -16,7 +16,7 @@ public class ServerToServerCommunication {
         stub = serverToServerCommunicationGrpc.newBlockingStub(channel);
     }
 
-    public void replicateQuiz(Quiz quiz) {
+    public long replicateQuiz(Quiz quiz) {
         try {
             quizMessage.Builder request = quizMessage.newBuilder().setId(quiz.getId());
             List<Question> questions = quiz.getQuestions();
@@ -33,10 +33,10 @@ public class ServerToServerCommunication {
                 q.build();
                 request.addQuestions(q);
             }
-            stub.replicateQuiz(request.build());
+            replicateResponse response = stub.replicateQuiz(request.build());
+            return response.getAvailableCapacity();
         } catch (Exception e) {
-            System.err.println("ERROR: " + e.getMessage());
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
     }
 

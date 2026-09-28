@@ -7,10 +7,13 @@ option java_package = "com.quiznodes.proto";
 option java_multiple_files = true;
 
 service serverToServerCommunication {
-  rpc replicateQuiz(quizMessage) returns (Empty);
+  rpc replicateQuiz(quizMessage) returns (replicateResponse);
   rpc sendLeaderHeartbeat(Empty) returns (heartbeatResponse);
 }
 
 message heartbeatResponse{
+  int64 availableCapacity = 1;
+}
+message replicateResponse{
   int64 availableCapacity = 1;
 }

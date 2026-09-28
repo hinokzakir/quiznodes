@@ -4,9 +4,7 @@ import com.quiznodes.proto.quizMessage;
 import com.quiznodes.server.types.NodeInfo;
 import com.quiznodes.server.types.Quiz;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -16,6 +14,7 @@ public class Manager {
     private ServerNode server;
     private List<ServerToServerCommunication> servers = new ArrayList<>();
     private List<Long> capacities = new ArrayList<>();
+    private Set<Integer> fullServers = new HashSet<>();
     private final ScheduledExecutorService heartbeatScheduler =
             Executors.newSingleThreadScheduledExecutor();
     public Manager(int port, int max_capacity, boolean isLeader) throws Exception {
@@ -45,7 +44,7 @@ public class Manager {
 
     public void replicateQuiz(Quiz quiz){
         int replicationFactor;
-        int nrServers = servers.size();
+        int nrServers = servers.size() - fullServers.size();
         if(nrServers == 1){
             replicationFactor = 1;
         } else if(nrServers < 4){
@@ -53,15 +52,22 @@ public class Manager {
         } else {
             replicationFactor = 3;
         }
-        Integer[] indices = new Integer[capacities.size()];
-        for(int i = 0; i < capacities.size(); i++){
-            indices[i] = i;
+        Integer[] indices = new Integer[capacities.size() - fullServers.size()];
+        int indicesIndex = 0;
+        for (int i = 0; i < capacities.size(); i++) {
+            if (!fullServers.contains(i)) {
+                indices[indicesIndex] = i;
+                indicesIndex++;
+            }
         }
 
         Arrays.sort(indices, (a, b) -> Long.compare(capacities.get(b), capacities.get(a)));
 
         for(int i = 0; i < replicationFactor; i++){
-            servers.get(indices[i]).replicateQuiz(quiz);
+            long capacity = servers.get(indices[i]).replicateQuiz(quiz);
+            if (capacity < 1){
+                fullServers.add(indices[i]);
+            }
         }
     }
 

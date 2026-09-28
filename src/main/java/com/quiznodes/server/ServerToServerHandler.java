@@ -17,7 +17,7 @@ public class ServerToServerHandler extends serverToServerCommunicationGrpc.serve
     }
 
     @Override
-    public void replicateQuiz(quizMessage request, StreamObserver<Empty> responseObserver) {
+    public void replicateQuiz(quizMessage request, StreamObserver<replicateResponse> responseObserver) {
         List<Question> questions = new ArrayList<>();
         for(questionMessage q : request.getQuestionsList()){
             Question question = new Question(
@@ -30,7 +30,8 @@ public class ServerToServerHandler extends serverToServerCommunicationGrpc.serve
         manager.addQuiz(request.getId(), new Quiz(questions));
         System.out.println("Quiz has been added");
         System.out.println("Questions:" + questions);
-        responseObserver.onNext(Empty.newBuilder().build());
+        long capacity = manager.getServerCapacity();
+        responseObserver.onNext(replicateResponse.newBuilder().setAvailableCapacity(capacity).build());
         responseObserver.onCompleted();
     }
 
