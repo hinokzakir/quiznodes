@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package messenger;
+import "messages.proto";
+
+option java_package = "com.quiznodes.proto";
+option java_multiple_files = true;
+
+service leaderInfoCommunication {
+  rpc getLeader(Empty) returns (leaderInfoMessage);
+  rpc addLeader(leaderInfoMessage) returns (Empty);
+}
+message leaderInfoMessage{
+  string ip = 1;
+  int32 port = 2;
+}

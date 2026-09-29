@@ -1,5 +1,6 @@
 package com.quiznodes.server;
 
+import com.quiznodes.server.LeaderInfoCommunication;
 import com.quiznodes.proto.quizMessage;
 import com.quiznodes.server.types.NodeInfo;
 import com.quiznodes.server.types.Quiz;
@@ -20,11 +21,12 @@ public class Manager {
     private Map<String, List<Integer>> quizToServersMap = new HashMap<>();
     private final ScheduledExecutorService heartbeatScheduler = Executors.newSingleThreadScheduledExecutor();
     private List<Process> serversStarted = new ArrayList<>();
+    private LeaderInfoCommunication leaderInfoCommunication;
 
     public Manager(int port, int max_capacity, boolean isLeader) throws Exception {
         serverBackend = new ServerBackend(max_capacity);
         server = new ServerNode(port, this);
-        //addServer("localhost", server.getPort());
+        leaderInfoCommunication = new LeaderInfoCommunication("localhost", 1337);
         server.start();
     }
 
@@ -155,6 +157,7 @@ public class Manager {
 
     public void setIamLeader() {
         this.state = 0;
+        leaderInfoCommunication.addLeader(server.getIp(), server.getPort());
         startLeaderHeartbeat();
     }
 

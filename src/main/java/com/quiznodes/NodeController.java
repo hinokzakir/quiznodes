@@ -1,5 +1,7 @@
 package com.quiznodes;
 
+import com.quiznodes.client.LeaderInfoCommunication;
+import com.quiznodes.proto.leaderInfoMessage;
 import com.quiznodes.server.Manager;
 import com.quiznodes.server.types.*;
 
@@ -49,35 +51,25 @@ public class NodeController {
     private ClientNode activeClient;
     private ScheduledExecutorService heartbeatScheduler;
     private List<Quiz> quizList;
+    private LeaderInfoCommunication leaderInfoCommunication;
+    private String leaderIp;
+    private int leaderPort;
+
+    @FXML
+    public void initialize() {
+
+        leaderInfoCommunication = new LeaderInfoCommunication("localhost", 1337);
+        leaderInfoMessage response = leaderInfoCommunication.getLeader();
+        this.leaderIp = response.getIp();
+        this.leaderPort = response.getPort();
+
+    }
 
     @FXML
     private void handleConnectClient() {
-        String host = clientHostField.getText().trim();
-        String portText = clientPortField.getText().trim();
-
-        if (host.isEmpty()) {
-            clientStatusLabel.setText("Error: Host address cannot be empty");
-            return;
-        }
-
-        int port;
-        try {
-            port = Integer.parseInt(portText);
-            if (port < 1 || port > 65535) {
-                clientStatusLabel.setText("Error: Port must be between 1 and 65535");
-                return;
-            }
-        } catch (NumberFormatException e) {
-            clientStatusLabel.setText("Error: Invalid port number format");
-            return;
-        }
-
-        clientStatusLabel.setText("Status: Connecting to " + host + ":" + port + "...");
-        connectClientBtn.setDisable(true);
-
         CompletableFuture.runAsync(() -> {
             try {
-                ClientNode clientNode = new ClientNode(host, port);
+                ClientNode clientNode = new ClientNode(this.leaderIp, this.leaderPort);
                 String response = clientNode.testRequestString("ping");
 
                 if (response != null && !response.isEmpty()) {

@@ -35,7 +35,6 @@
                   <VBox spacing="8.0" styleClass="input-group">
                      <children>
                         <Label styleClass="field-label" text="Port Number" />
-                        <TextField fx:id="clientPortField" promptText="50051" text="50051" />
                           <Button fx:id="connectClientBtn" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleConnectClient" styleClass="primary-button" text="Connect Client" />
                         <Button fx:id="sendQuizBtn" managed="false" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleSendQuiz" prefHeight="42.0" prefWidth="112.0" styleClass="primary-button" text="Send Quiz" visible="false" />
                         <Button fx:id="getQuizBtn" managed="false" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleGetQuiz" prefHeight="42.0" prefWidth="112.0" styleClass="primary-button" text="Get Quiz" visible="false" />
