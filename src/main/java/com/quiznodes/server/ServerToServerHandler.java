@@ -34,6 +34,7 @@ public class ServerToServerHandler extends serverToServerCommunicationGrpc.serve
     @Override
     public void sendLeaderHeartbeat(Empty request, StreamObserver<heartbeatResponse> responseObserver) {
         long capacity = manager.getServerCapacity();
+        manager.resetElectionTimeout();
         System.out.println("Received Heartbeat");
         responseObserver.onNext(heartbeatResponse.newBuilder().setAvailableCapacity(capacity).build());
         responseObserver.onCompleted();

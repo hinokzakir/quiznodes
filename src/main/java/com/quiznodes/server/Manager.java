@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 public class Manager {
@@ -24,12 +25,19 @@ public class Manager {
     private List<Process> serversStarted = new ArrayList<>();
     private LeaderInfoCommunication leaderInfoCommunication;
     public ElectionHandler electionHandler; // under construction
+    private ScheduledFuture<?> electionTimeoutTask;
 
     public Manager(int port, int max_capacity, boolean isLeader) throws Exception {
         serverBackend = new ServerBackend(max_capacity);
         server = new ServerNode(port, this);
         leaderInfoCommunication = new LeaderInfoCommunication("localhost", 1337);
         this.electionHandler = new ElectionHandler(0);
+        if (!isLeader) {
+            this.state = 2;
+            resetElectionTimeout();
+        } else {
+            setIamLeader();
+        }
         server.start();
     }
 
@@ -110,7 +118,7 @@ public class Manager {
         heartbeatScheduler.scheduleAtFixedRate(
                 this::sendLeaderHeartbeat,
                 0,
-                10,
+                5,
                 TimeUnit.SECONDS);
     }
 
@@ -160,6 +168,9 @@ public class Manager {
 
     public void setIamLeader() {
         this.state = 0;
+        if (electionTimeoutTask != null) {
+            electionTimeoutTask.cancel(false);
+        }
         leaderInfoCommunication.addLeader(server.getIp(), server.getPort());
         startLeaderHeartbeat();
     }
@@ -175,18 +186,25 @@ public class Manager {
         electionHandler.setHasVoted(true);
         electionHandler.increaseVote();
 
-        int totalNodes = servers.size() + 1; // self + other nodes
+        int totalNodes = servers.size();
         int majority = (totalNodes / 2) + 1;
 
         if (electionHandler.getVotes() >= majority) {
             setIamLeader();
+            System.out.println("I am new LEADER!!!!!!!");
             return;
         }
 
-        for (ServerToServerCommunication peer : servers) {
+        Iterator<ServerToServerCommunication> iterator = servers.iterator();
+        while (iterator.hasNext()) {
+            if (this.state != 1) {
+                return;
+            }
+            ServerToServerCommunication peer = iterator.next();
             try {
+                System.out.println("Sending RequestVote...");
                 responseVoteMessage response = peer.requestVote(server.getIp(), server.getPort(), newTerm);
-
+                System.out.println("Vote result: " + response.getVoteGranted() + " (term: " + response.getTerm() + ")");
                 // cancel election if current term is to low
                 if (response.getTerm() > electionHandler.getTerm()) {
                     setState(2);
@@ -200,12 +218,32 @@ public class Manager {
 
                     if (electionHandler.getVotes() >= majority) {
                         setIamLeader();
+                        System.out.println("I am new LEADER!!!!!!!");
                         return;
                     }
                 }
             } catch (Exception e) {
-                System.err.println("RequestVote failed: " + e.getMessage());
+                if (Thread.currentThread().isInterrupted() || this.state != 1) {
+                    return;
+                }
+                System.err.println("RequestVote failed (removing dead peer): " + e.getMessage());
+                iterator.remove();
             }
+        }
+    }
+
+    public synchronized void resetElectionTimeout() {
+        // cancel timeout if active
+        if (electionTimeoutTask != null && !electionTimeoutTask.isDone()) {
+            electionTimeoutTask.cancel(true);
+        }
+
+        if (this.state != 0) {
+            int timeoutSeconds = 12 + new Random().nextInt(5); // gives random timeout 12-16s
+            electionTimeoutTask = heartbeatScheduler.schedule(() -> {
+                System.out.println("Heartbeat timeout reached! Starting leader election...");
+                startElection();
+            }, timeoutSeconds, TimeUnit.SECONDS);
         }
     }
 

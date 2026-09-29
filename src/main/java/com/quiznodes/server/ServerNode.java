@@ -40,7 +40,7 @@ public class ServerNode {
                             "Registered with Name Service: [Name]: " + name + ", [IP]: " + ip + ", [Port]: " + port);
 
                     // Initial resolve + connect.
-                    
+
                     nameServiceHandler.syncAndConnectNodes(name);
                 } catch (Exception e) {
                     System.err.println("Error during name service registration/resolution: " + e.getMessage());
