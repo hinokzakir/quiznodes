@@ -2,6 +2,7 @@ package com.quiznodes.server;
 
 import com.quiznodes.server.LeaderInfoCommunication;
 import com.quiznodes.proto.quizMessage;
+import com.quiznodes.proto.responseVoteMessage;
 import com.quiznodes.server.types.NodeInfo;
 import com.quiznodes.server.types.Quiz;
 
@@ -22,11 +23,13 @@ public class Manager {
     private final ScheduledExecutorService heartbeatScheduler = Executors.newSingleThreadScheduledExecutor();
     private List<Process> serversStarted = new ArrayList<>();
     private LeaderInfoCommunication leaderInfoCommunication;
+    public ElectionHandler electionHandler; // under construction
 
     public Manager(int port, int max_capacity, boolean isLeader) throws Exception {
         serverBackend = new ServerBackend(max_capacity);
         server = new ServerNode(port, this);
         leaderInfoCommunication = new LeaderInfoCommunication("localhost", 1337);
+        this.electionHandler = new ElectionHandler(0);
         server.start();
     }
 
@@ -163,6 +166,47 @@ public class Manager {
 
     public void setState(int newState) {
         this.state = newState;
+    }
+
+    public void startElection() {
+        setState(1);
+        long newTerm = electionHandler.getTerm() + 1;
+        electionHandler.setTerm(newTerm);
+        electionHandler.setHasVoted(true);
+        electionHandler.increaseVote();
+
+        int totalNodes = servers.size() + 1; // self + other nodes
+        int majority = (totalNodes / 2) + 1;
+
+        if (electionHandler.getVotes() >= majority) {
+            setIamLeader();
+            return;
+        }
+
+        for (ServerToServerCommunication peer : servers) {
+            try {
+                responseVoteMessage response = peer.requestVote(server.getIp(), server.getPort(), newTerm);
+
+                // cancel election if current term is to low
+                if (response.getTerm() > electionHandler.getTerm()) {
+                    setState(2);
+                    electionHandler.setTerm(response.getTerm());
+                    electionHandler.setHasVoted(false);
+                    return;
+                }
+
+                if (response.getVoteGranted() && state == 1) {
+                    electionHandler.increaseVote();
+
+                    if (electionHandler.getVotes() >= majority) {
+                        setIamLeader();
+                        return;
+                    }
+                }
+            } catch (Exception e) {
+                System.err.println("RequestVote failed: " + e.getMessage());
+            }
+        }
     }
 
     public static void main(String[] args) throws Exception {

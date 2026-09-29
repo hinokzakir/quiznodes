@@ -75,9 +75,28 @@ public class ServerToServerHandler extends serverToServerCommunicationGrpc.serve
     
     }
     
-    // @Override
-    // public void requestVote(requestVoteMessage request, StreamObserver<responseVoteMessage> responseObserver) {
-    //     long newTerm = request.getTerm() + 1;
-    //     responseVoteMessage.Builder response = responseVoteMessage.newBuilder().setTerm(newTerm);
-    // }
+    @Override
+    public void requestVote(requestVoteMessage request, StreamObserver<responseVoteMessage> responseObserver) {
+        // handling voting request from server
+        responseVoteMessage.Builder builder = responseVoteMessage.newBuilder();
+        
+        // first we need to check if we already have voted
+
+        if(request.getTerm() > manager.electionHandler.getTerm()) {
+            manager.setState(2); // set server to candidate since we are 1 term behind
+            manager.electionHandler.setTerm(request.getTerm());
+            manager.electionHandler.setHasVoted(false);
+        }
+
+        long localTerm = manager.electionHandler.getTerm();
+        boolean hasVoted = manager.electionHandler.getHasVoted();
+
+        boolean voteGranted = ((request.getTerm() >= localTerm) && !hasVoted);
+        
+        builder.setVoteGranted(voteGranted);
+
+        builder.setTerm(manager.electionHandler.getTerm());
+        responseObserver.onNext(builder.build());
+        responseObserver.onCompleted();
+    }
 }
