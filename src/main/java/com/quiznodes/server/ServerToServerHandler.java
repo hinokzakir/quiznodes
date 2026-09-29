@@ -1,7 +1,5 @@
 package com.quiznodes.server;
 
-import com.quiznodes.proto.quizMessage;
-import com.quiznodes.proto.serverToServerCommunicationGrpc;
 import com.quiznodes.proto.*;
 import com.quiznodes.server.types.Question;
 import com.quiznodes.server.types.Quiz;
@@ -74,5 +72,12 @@ public class ServerToServerHandler extends serverToServerCommunicationGrpc.serve
         manager.addServer(request.getIp(), request.getPort());
         responseObserver.onNext(Empty.newBuilder().build());
         responseObserver.onCompleted();
+    
     }
+    
+    // @Override
+    // public void requestVote(requestVoteMessage request, StreamObserver<responseVoteMessage> responseObserver) {
+    //     long newTerm = request.getTerm() + 1;
+    //     responseVoteMessage.Builder response = responseVoteMessage.newBuilder().setTerm(newTerm);
+    // }
 }

@@ -18,7 +18,7 @@ public class NameServiceHandler {
         this.manager = manager;
     }
 
-    public NameService connectNamingService (){
+    public NameService connectNamingService() {
         try {
             Registry registry = LocateRegistry.getRegistry("localhost", 1099);
             this.nameService = (NameService) registry.lookup("QuizNodeNamingService");
@@ -33,9 +33,11 @@ public class NameServiceHandler {
 
     public void syncAndConnectNodes(String name) throws Exception {
         Map<String, Map<String, Integer>> nodes = nameService.resolveGroup();
-        if(nodes.size() == 1){
+        if (nodes.size() == 1) {
             System.out.println("I am alone. I am leader");
             manager.setIamLeader();
+        } else {
+            manager.setState(2); // follower
         }
         for (Map.Entry<String, Map<String, Integer>> entry : nodes.entrySet()) {
             String nodeName = entry.getKey();
@@ -56,13 +58,14 @@ public class NameServiceHandler {
                 manager.joinNetwork();
                 System.out.println("Connecting to node " + nodeName + " at " + nodeIp + ":" + nodePort);
                 // this is when i we know how to connect server nodes
-                //boolean ok = connect(nodeIp, nodePort);
-               // System.out.println("Connect to " + nodeName + " -> " + (ok ? "OK" : "FAILED"));
+                // boolean ok = connect(nodeIp, nodePort);
+                // System.out.println("Connect to " + nodeName + " -> " + (ok ? "OK" :
+                // "FAILED"));
             }
         }
     }
 
-     public void registerNode(String name, String ip, int port){
+    public void registerNode(String name, String ip, int port) {
         if (nameServiceAvailable) {
             try {
                 // Initial resolve + connect.

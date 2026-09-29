@@ -5,23 +5,23 @@ import java.util.Scanner;
 
 public class ServerApp {
     public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
-        int selectedPort = 0;
-        while (true) {
-            System.out.print("Enter port number for Server Node (1-65535): ");
-            String input = scanner.nextLine().trim();
-            try {
-                int parsed = Integer.parseInt(input);
-                if (parsed >= 1 && parsed <= 65535) {
-                    selectedPort = parsed;
-                    break;
-                }
-                System.out.println("Port number must be between 1 and 65535.");
-            } catch (NumberFormatException e) {
-                System.out.println("Invalid input. Please enter a valid port number.");
-            }
-        }
-        final int port = selectedPort;
+        // Scanner scanner = new Scanner(System.in);
+        // int selectedPort = 0;
+        // while (true) {
+        //     // System.out.print("Enter port number for Server Node (1-65535): ");
+        //     // String input = scanner.nextLine().trim();
+        //     // try {
+        //     // //int parsed = Integer.parseInt(input);
+        //     // if (parsed >= 1 && parsed <= 65535) {
+        //     // selectedPort = parsed;
+        //     // break;
+        //     // }
+        //     // System.out.println("Port number must be between 1 and 65535.");
+        //     // } catch (NumberFormatException e) {
+        //     // System.out.println("Invalid input. Please enter a valid port number.");
+        //     // }
+        // }
+        final int port = 0;
 
         try {
             Manager manager = new Manager(port, 100, false);

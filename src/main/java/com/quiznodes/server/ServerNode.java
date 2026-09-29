@@ -12,7 +12,7 @@ public class ServerNode {
     private Server server;
     private NameServiceHandler nameServiceHandler;
     private NameService nameService;
-
+    private Manager manager;
 
     public ServerNode(int port, Manager manager) {
         this.ip = "localhost";
@@ -23,32 +23,37 @@ public class ServerNode {
                 .addService(new ServerToServerHandler(manager))
                 .build();
         this.nameServiceHandler = new NameServiceHandler(manager);
+        this.manager = manager;
     }
 
     public void start() throws Exception {
         server.start();
+        this.port = server.getPort();
+        this.name = ip + ":" + port;
         this.nameService = nameServiceHandler.connectNamingService();
-        if(nameService != null){
+        if (nameService != null) {
             if (nameServiceHandler.nameServiceAvailable) {
-            try {
-                nameService.registerNode(name, ip, port);
-                System.out.println(
-                        "Registered with Name Service: [Name]: " + name + ", [IP]: " + ip + ", [Port]: " + port);
+                try {
+                    nameService.registerNode(name, ip, port);
+                    manager.addServer(ip, port);
+                    System.out.println(
+                            "Registered with Name Service: [Name]: " + name + ", [IP]: " + ip + ", [Port]: " + port);
 
-                // Initial resolve + connect.
-                nameServiceHandler.syncAndConnectNodes(name);
-            } catch (Exception e) {
-                System.err.println("Error during name service registration/resolution: " + e.getMessage());
-                e.printStackTrace();
+                    // Initial resolve + connect.
+                    
+                    nameServiceHandler.syncAndConnectNodes(name);
+                } catch (Exception e) {
+                    System.err.println("Error during name service registration/resolution: " + e.getMessage());
+                    e.printStackTrace();
+                }
             }
         }
-        }
-        
+
     }
 
     public void stop() {
         if (server != null) {
-            if(nameService != null){
+            if (nameService != null) {
                 try {
                     nameService.unregisterNode(name);
                 } catch (Exception e) {
@@ -67,16 +72,19 @@ public class ServerNode {
     }
 
     public String getIp() {
-        return ip;
+        return this.ip;
     }
 
     public int getPort() {
-        return port;
+        return this.port;
     }
-    /*public static void main(String[] args) throws Exception {
-        int port = 0;
-        ServerNode server = new ServerNode(port);
-        server.start();
-        server.server.awaitTermination();
-    }*/
+
+    /*
+     * public static void main(String[] args) throws Exception {
+     * int port = 0;
+     * ServerNode server = new ServerNode(port);
+     * server.start();
+     * server.server.awaitTermination();
+     * }
+     */
 }
