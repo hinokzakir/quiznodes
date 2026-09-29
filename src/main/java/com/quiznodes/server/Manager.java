@@ -16,7 +16,7 @@ public class Manager {
     private List<ServerToServerCommunication> servers = new ArrayList<>();
     private List<Long> capacities = new ArrayList<>();
     private Set<Integer> fullServers = new HashSet<>();
-    private Map<String, Integer> quizToServerMap = new HashMap<>();
+    private Map<String, List<Integer>> quizToServersMap = new HashMap<>();
     private final ScheduledExecutorService heartbeatScheduler =
             Executors.newSingleThreadScheduledExecutor();
     private List<Process> serversStarted = new ArrayList<>();
@@ -79,10 +79,10 @@ public class Manager {
         }
 
         Arrays.sort(indices, (a, b) -> Long.compare(capacities.get(b), capacities.get(a)));
-
+        quizToServersMap.put(quiz.getId(), new ArrayList<>());
         for(int i = 0; i < replicationFactor; i++){
             long capacity = servers.get(indices[i]).replicateQuiz(quiz);
-            quizToServerMap.put(quiz.getId(), indices[i]);
+            quizToServersMap.get(quiz.getId()).add(indices[i]);
             if (capacity < 1){
                 fullServers.add(indices[i]);
             }
@@ -143,9 +143,15 @@ public class Manager {
     }
 
     public quizMessage getQuizFromCorrectServer(String id){
-        System.out.println(quizToServerMap.get(id));
-        ServerToServerCommunication serverToServerCommunication = servers.get(quizToServerMap.get(id));
-        return serverToServerCommunication.getQuiz(id);
+        for (int index: quizToServersMap.get(id)) {
+            try {
+                ServerToServerCommunication serverToServerCommunication = servers.get(index);
+                return serverToServerCommunication.getQuiz(id);
+            }catch (Exception e){
+                System.err.println("Server" + index + " failed getting quiz");
+            }
+        }
+        return null;
     }
 
     public static void main(String[] args) throws Exception {
