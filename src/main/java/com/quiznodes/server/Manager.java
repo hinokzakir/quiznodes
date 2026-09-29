@@ -19,6 +19,7 @@ public class Manager {
     private Map<String, Integer> quizToServerMap = new HashMap<>();
     private final ScheduledExecutorService heartbeatScheduler =
             Executors.newSingleThreadScheduledExecutor();
+    private List<Process> serversStarted = new ArrayList<>();
     public Manager(int port, int max_capacity, boolean isLeader) throws Exception {
         serverBackend = new ServerBackend(max_capacity);
         server = new ServerNode(port, this);
@@ -41,12 +42,13 @@ public class Manager {
                 "java",
                 "-cp",
                 System.getProperty("java.class.path"),
-                "com.quiznodes.ServerApp"
+                "com.quiznodes.server.Manager"
         );
 
         processBuilder.inheritIO();
 
         Process process = processBuilder.start();
+        serversStarted.add(process);
     }
 
     public Quiz getQuiz(String id){
@@ -89,6 +91,11 @@ public class Manager {
 
     public void stopServer(){
         server.stop();
+        for(Process process : serversStarted){
+            if(process.isAlive()){
+                process.destroy();
+            }
+        }
     }
 
     public void blockUntilShutdown() throws InterruptedException {
@@ -116,6 +123,7 @@ public class Manager {
             total_capacity += capacity;
         }
         System.out.println("Capacities: " + capacities);
+        System.out.println("Calculation: " + total_capacity/total_max_capacity);
         if(total_capacity/total_max_capacity < 0.2){
             try {
                 startNewServer();
@@ -141,6 +149,7 @@ public class Manager {
     }
 
     public static void main(String[] args) throws Exception {
-        Manager manager = new Manager(50051, 100,false);
+        Manager manager = new Manager(2224, 100,false);
+        manager.blockUntilShutdown();
     }
 }
