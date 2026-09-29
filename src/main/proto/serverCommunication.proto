@@ -10,6 +10,7 @@ service serverToServerCommunication {
   rpc replicateQuiz(quizMessage) returns (replicateResponse);
   rpc sendLeaderHeartbeat(Empty) returns (heartbeatResponse);
   rpc getQuiz (quizId) returns (quizMessage);
+  rpc joinNetwork (joinMessage) returns (Empty);
 }
 
 message heartbeatResponse{
@@ -17,4 +18,8 @@ message heartbeatResponse{
 }
 message replicateResponse{
   int64 availableCapacity = 1;
+}
+message joinMessage{
+  string ip = 1;
+  int32 port = 2;
 }

@@ -12,6 +12,11 @@ public class NameServiceHandler {
     private NameService nameService;
     public boolean nameServiceAvailable = false;
     public final Set<String> discoveredNodes = ConcurrentHashMap.newKeySet();
+    private Manager manager;
+
+    public NameServiceHandler(Manager manager) {
+        this.manager = manager;
+    }
 
     public NameService connectNamingService (){
         try {
@@ -28,6 +33,10 @@ public class NameServiceHandler {
 
     public void syncAndConnectNodes(String name) throws Exception {
         Map<String, Map<String, Integer>> nodes = nameService.resolveGroup();
+        if(nodes.size() == 1){
+            System.out.println("I am alone. I am leader");
+            manager.setIamLeader();
+        }
         for (Map.Entry<String, Map<String, Integer>> entry : nodes.entrySet()) {
             String nodeName = entry.getKey();
             if (nodeName.equals(name)) {
@@ -43,6 +52,8 @@ public class NameServiceHandler {
                     continue;
                 }
 
+                manager.addServer(nodeIp, nodePort);
+                manager.joinNetwork();
                 System.out.println("Connecting to node " + nodeName + " at " + nodeIp + ":" + nodePort);
                 // this is when i we know how to connect server nodes
                 //boolean ok = connect(nodeIp, nodePort);
@@ -54,11 +65,10 @@ public class NameServiceHandler {
      public void registerNode(String name, String ip, int port){
         if (nameServiceAvailable) {
             try {
+                // Initial resolve + connect.
                 nameService.registerNode(name, ip, port);
                 System.out.println(
                         "Registered with Name Service: [Name]: " + name + ", [IP]: " + ip + ", [Port]: " + port);
-
-                // Initial resolve + connect.
                 syncAndConnectNodes(name);
             } catch (Exception e) {
                 System.err.println("Error during name service registration/resolution: " + e.getMessage());

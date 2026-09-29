@@ -12,11 +12,12 @@ public class Main {
         System.out.println(response);
 
         // test send quiz
-        Quiz quiz = new Quiz();
-        String sendQuizResponse = client.sendQuiz(quiz);
-        System.out.println("Sent Quiz: " + sendQuizResponse);
-        Thread.sleep(5000);
-        Quiz getQuiz = client.getQuiz(sendQuizResponse);
-        System.out.println("Found quiz: " + getQuiz.getId());
+        for (int i = 0; i < 1;i++) {
+            Quiz quiz = new Quiz();
+            String sendQuizResponse = client.sendQuiz(quiz);
+            System.out.println("Sent Quiz: " + sendQuizResponse);
+            Quiz getQuiz = client.getQuiz(sendQuizResponse);
+            System.out.println("Found quiz: " + getQuiz.getId());
+        }
     }
 }

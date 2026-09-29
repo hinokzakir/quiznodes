@@ -22,7 +22,7 @@ public class ServerNode {
                 .addService(new ServiceHandler(manager))
                 .addService(new ServerToServerHandler(manager))
                 .build();
-        this.nameServiceHandler = new NameServiceHandler();
+        this.nameServiceHandler = new NameServiceHandler(manager);
     }
 
     public void start() throws Exception {
@@ -66,6 +66,13 @@ public class ServerNode {
         }
     }
 
+    public String getIp() {
+        return ip;
+    }
+
+    public int getPort() {
+        return port;
+    }
     /*public static void main(String[] args) throws Exception {
         int port = 0;
         ServerNode server = new ServerNode(port);

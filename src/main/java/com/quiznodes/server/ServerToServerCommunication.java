@@ -51,4 +51,9 @@ public class ServerToServerCommunication {
         quizId request = quizId.newBuilder().setId(id).build();
         return stub.getQuiz(request);
     }
+
+    public void joinNetwork(String ip, int port) {
+        joinMessage message = joinMessage.newBuilder().setIp(ip).setPort(port).build();
+        stub.joinNetwork(message);
+    }
 }

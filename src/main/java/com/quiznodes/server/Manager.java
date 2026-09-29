@@ -23,12 +23,7 @@ public class Manager {
     public Manager(int port, int max_capacity, boolean isLeader) throws Exception {
         serverBackend = new ServerBackend(max_capacity);
         server = new ServerNode(port, this);
-        addServer("localhost", 2222);
-        addServer("localhost", 2223);
         addServer("localhost", port);
-        if (isLeader) {
-            startLeaderHeartbeat();
-        }
         server.start();
     }
     public void addServer(String host, int port){
@@ -42,7 +37,7 @@ public class Manager {
                 "java",
                 "-cp",
                 System.getProperty("java.class.path"),
-                "com.quiznodes.server.Manager"
+                "com.quiznodes.ServerApp"
         );
 
         processBuilder.inheritIO();
@@ -127,7 +122,6 @@ public class Manager {
         if(total_capacity/total_max_capacity < 0.2){
             try {
                 startNewServer();
-                addServer("localhost", 2224);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -154,8 +148,16 @@ public class Manager {
         return null;
     }
 
+    public void joinNetwork(){
+        servers.getLast().joinNetwork(server.getIp(), server.getPort());
+    }
+
+    public void setIamLeader(){
+        startLeaderHeartbeat();
+    }
+
     public static void main(String[] args) throws Exception {
-        Manager manager = new Manager(2224, 100,false);
+        Manager manager = new Manager(0, 100,false);
         manager.blockUntilShutdown();
     }
 }

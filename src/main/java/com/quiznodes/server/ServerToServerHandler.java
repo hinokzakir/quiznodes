@@ -68,4 +68,11 @@ public class ServerToServerHandler extends serverToServerCommunicationGrpc.serve
         responseObserver.onNext(builder.build());
         responseObserver.onCompleted();
     }
+
+    @Override
+    public void joinNetwork(joinMessage request, StreamObserver<Empty> responseObserver) {
+        manager.addServer(request.getIp(), request.getPort());
+        responseObserver.onNext(Empty.newBuilder().build());
+        responseObserver.onCompleted();
+    }
 }
