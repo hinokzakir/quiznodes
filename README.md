@@ -21,12 +21,17 @@ mvn exec:java
 
 3.2. To run the serverApp
 ```bash
-mvn exec:java -Dexec.mainClass="com.quiznodes.serverApp"
+mvn exec:java -Dexec.mainClass="com.quiznodes.ServerApp"
 ```
 
 3.3. To run the naming service
 ```bash
 mvn exec:java -Dexec.mainClass="com.quiznodes.namingservice.Server"
+```
+
+3.4. To run the Leader info
+```bash
+mvn exec:java -Dexec.mainClass="com.quiznodes.info.LeaderInfoServer"
 ```
 
 

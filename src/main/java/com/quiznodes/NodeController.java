@@ -69,6 +69,11 @@ public class NodeController {
     private void handleConnectClient() {
         CompletableFuture.runAsync(() -> {
             try {
+                // this can be removed later, now leader info is updated at button press
+                leaderInfoMessage leaderResponse = leaderInfoCommunication.getLeader();
+                this.leaderIp = leaderResponse.getIp();
+                this.leaderPort = leaderResponse.getPort();
+
                 ClientNode clientNode = new ClientNode(this.leaderIp, this.leaderPort);
                 String response = clientNode.testRequestString("ping");
 
@@ -81,7 +86,7 @@ public class NodeController {
                         clientStatusLabel.setText("Status: Connected (" + response + ")");
                         connectClientBtn.setDisable(false);
                         setServiceButtonsVisible(true);
-                        
+
                         if (quizListView != null && fetchedQuizzes != null) {
                             quizListView.setItems(FXCollections.observableArrayList(fetchedQuizzes));
                         }
@@ -98,7 +103,8 @@ public class NodeController {
                 }
             } catch (Exception e) {
                 Platform.runLater(() -> {
-                    clientStatusLabel.setText("Error: " + (e.getMessage() != null ? e.getMessage() : "Connection failed"));
+                    clientStatusLabel
+                            .setText("Error: " + (e.getMessage() != null ? e.getMessage() : "Connection failed"));
                     connectClientBtn.setDisable(false);
                     setServiceButtonsVisible(false);
                     setListVisible(false);
@@ -107,8 +113,8 @@ public class NodeController {
         });
     }
 
-    @FXML 
-    private void handleSendQuiz() { 
+    @FXML
+    private void handleSendQuiz() {
         if (activeClient == null) {
             handleConnectionLost("Connection Lost (Server Offline)");
             return;
@@ -130,8 +136,8 @@ public class NodeController {
         });
     }
 
-    @FXML 
-    private void handleGetQuiz() { 
+    @FXML
+    private void handleGetQuiz() {
         if (activeClient == null) {
             handleConnectionLost("Connection Lost (Server Offline)");
             return;
@@ -196,7 +202,8 @@ public class NodeController {
         if (activeClient != null) {
             try {
                 activeClient.shutdown();
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+            }
             activeClient = null;
         }
         Platform.runLater(() -> {
@@ -225,7 +232,7 @@ public class NodeController {
     }
 
     private void setListVisible(boolean visible) {
-        if (quizListCard != null){
+        if (quizListCard != null) {
             quizListCard.setVisible(visible);
             quizListCard.setManaged(visible);
         }
