@@ -195,12 +195,11 @@ public class Manager {
             return;
         }
 
-        Iterator<ServerToServerCommunication> iterator = servers.iterator();
-        while (iterator.hasNext()) {
+        for(int i = 0; i < servers.size(); i++) {
             if (this.state != 1) {
                 return;
             }
-            ServerToServerCommunication peer = iterator.next();
+            ServerToServerCommunication peer = servers.get(i);
             try {
                 System.out.println("Sending RequestVote...");
                 responseVoteMessage response = peer.requestVote(server.getIp(), server.getPort(), newTerm);
@@ -227,7 +226,8 @@ public class Manager {
                     return;
                 }
                 System.err.println("RequestVote failed (removing dead peer): " + e.getMessage());
-                iterator.remove();
+                servers.remove(i);
+                capacities.remove(i);
             }
         }
     }
