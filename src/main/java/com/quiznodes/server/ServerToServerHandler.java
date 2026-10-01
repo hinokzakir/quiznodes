@@ -1,5 +1,4 @@
 package com.quiznodes.server;
-
 import com.quiznodes.proto.*;
 import com.quiznodes.server.types.Question;
 import com.quiznodes.server.types.Quiz;
@@ -93,6 +92,12 @@ public class ServerToServerHandler extends serverToServerCommunicationGrpc.serve
         boolean hasVoted = manager.electionHandler.getHasVoted();
 
         boolean voteGranted = ((request.getTerm() >= localTerm) && !hasVoted);
+
+        if(voteGranted) {
+            manager.electionHandler.setHasVoted(voteGranted);
+        }
+        System.out.println("Vote requested by " + request.getPort() + " for term " 
+            + request.getTerm() + ", granted: " + voteGranted);
         
         builder.setVoteGranted(voteGranted);
 

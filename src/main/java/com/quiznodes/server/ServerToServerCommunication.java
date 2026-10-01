@@ -11,10 +11,14 @@ import java.util.List;
 
 public class ServerToServerCommunication {
     private serverToServerCommunicationGrpc.serverToServerCommunicationBlockingStub stub;
+    private String host;
+    private int port;
 
     public ServerToServerCommunication(String host, int port) {
         ManagedChannel channel = ManagedChannelBuilder.forAddress(host, port).usePlaintext().build();
         stub = serverToServerCommunicationGrpc.newBlockingStub(channel);
+        this.host = host;
+        this.port = port;
     }
 
     public long replicateQuiz(Quiz quiz) {
@@ -68,4 +72,12 @@ public class ServerToServerCommunication {
         responseVoteMessage response = stub.requestVote(message);
         return response;     
     }
+
+    public int getPort() {
+        return port;
+    }
+    public String getHost() {
+        return host;
+    }
+
 }

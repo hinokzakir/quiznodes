@@ -181,6 +181,7 @@ public class Manager {
 
     public void startElection() {
         setState(1);
+        electionHandler.resetVotes();
         long newTerm = electionHandler.getTerm() + 1;
         electionHandler.setTerm(newTerm);
         electionHandler.setHasVoted(true);
@@ -188,6 +189,22 @@ public class Manager {
 
         int totalNodes = servers.size();
         int majority = (totalNodes / 2) + 1;
+
+        System.out.println("Starting election term " + newTerm + ", votes: " 
+            + electionHandler.getVotes() + "/" + majority);
+
+        if(totalNodes <= 2) {
+            System.out.println("Only " + totalNodes + " in network. election impossible...");
+
+            if (isDesignatedSpawner()) {
+                try {
+                    System.out.println("Spawning new ServerApp");
+                    startNewServer();
+                } catch (IOException e) {
+                    System.err.println("Failed to start new server: " + e.getMessage());
+                }
+            }
+        }
 
         if (electionHandler.getVotes() >= majority) {
             setIamLeader();
@@ -214,6 +231,8 @@ public class Manager {
 
                 if (response.getVoteGranted() && state == 1) {
                     electionHandler.increaseVote();
+                    System.out.println("Got vote from " + peer.getPort() 
+                    + ", votes: " + electionHandler.getVotes() + " / " + majority);
 
                     if (electionHandler.getVotes() >= majority) {
                         setIamLeader();
@@ -228,6 +247,8 @@ public class Manager {
                 System.err.println("RequestVote failed (removing dead peer): " + e.getMessage());
                 servers.remove(i);
                 capacities.remove(i);
+                totalNodes = servers.size();
+                majority = (totalNodes / 2) + 1;
             }
         }
     }
@@ -242,9 +263,21 @@ public class Manager {
             int timeoutSeconds = 12 + new Random().nextInt(5); // gives random timeout 12-16s
             electionTimeoutTask = heartbeatScheduler.schedule(() -> {
                 System.out.println("Heartbeat timeout reached! Starting leader election...");
+                // remove the leader from servers list
                 startElection();
             }, timeoutSeconds, TimeUnit.SECONDS);
         }
+    }
+
+    private boolean isDesignatedSpawner() {
+        // Example: The node with the smallest port number is responsible for spawning
+        int myPort = server.getPort();
+        for (ServerToServerCommunication peer : servers) {
+            if (peer.getPort() < myPort) {
+                return false; // A peer has a lower port, let them spawn it
+            }
+        }
+        return true; // I have the lowest port among all active nodes
     }
 
     public static void main(String[] args) throws Exception {
