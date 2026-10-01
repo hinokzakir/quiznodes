@@ -32,10 +32,13 @@ public class ClientNode {
     public String testRequestString(String msg) {
         try {
             testMessage request = testMessage.newBuilder().setMsg(msg).build();
-            testMessage response = blockingStub.testService(request);
+            testMessage response = blockingStub.withDeadlineAfter(3, TimeUnit.SECONDS).testService(request);
 
             return response.getMsg();
-        } catch (Exception e) {
+        } catch (StatusRuntimeException e) {
+            if(e.getStatus().getCode() == Status.Code.DEADLINE_EXCEEDED) {
+                throw new StatusRuntimeException(e.getStatus());
+            }
             System.err.println("ERROR: " + e.getMessage());
             e.printStackTrace();
         }

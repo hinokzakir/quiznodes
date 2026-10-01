@@ -204,21 +204,12 @@ public class NodeController {
             } catch (Exception ignored) {}
             activeClient = null;
         }
+        leaderInfoMessage infoMessage = leaderInfoCommunication.getLeader();
+        leaderIp = infoMessage.getIp();
+        leaderPort = infoMessage.getPort();
+        activeClient = new ClientNode(leaderIp, leaderPort);
         Platform.runLater(() -> {
-            leaderInfoMessage infoMessage = leaderInfoCommunication.getLeader();
-            leaderIp = infoMessage.getIp();
-            leaderPort = infoMessage.getPort();
-            activeClient = new ClientNode(leaderIp, leaderPort);
             clientStatusLabel.setText("Status: " + message);
-            /*connectClientBtn.setDisable(false);
-            setServiceButtonsVisible(false);
-            setListVisible(false);
-            if (quizList != null) {
-                quizList.clear();
-            }
-            if (quizListView != null) {
-                quizListView.getItems().clear();
-            }*/
         });
     }
 
