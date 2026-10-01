@@ -7,6 +7,7 @@ import com.quiznodes.server.types.*;
 
 import com.quiznodes.client.ClientNode;
 import com.quiznodes.server.ServerNode;
+import io.grpc.StatusRuntimeException;
 import javafx.collections.FXCollections;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -114,18 +115,22 @@ public class NodeController {
             return;
         }
         CompletableFuture.runAsync(() -> {
-            try {
-                String response = activeClient.testRequestString("ping");
-                if (response == null || response.isEmpty()) {
+            boolean retry = true;
+            while (retry) {
+                try {
+                    String response = activeClient.testRequestString("ping");
+                    if (response == null || response.isEmpty()) {
+                        handleConnectionLost("Connection Lost (Server Offline)");
+                    } else {
+                        Platform.runLater(() -> clientStatusLabel.setText("Status: Send Quiz requested"));
+                        Quiz quiz = new Quiz();
+                        String sendQuizResponse = activeClient.sendQuiz(quiz);
+                        Platform.runLater(() -> clientStatusLabel.setText("Response: " + sendQuizResponse));
+                        retry = false;
+                    }
+                }  catch (Exception e) {
                     handleConnectionLost("Connection Lost (Server Offline)");
-                } else {
-                    Platform.runLater(() -> clientStatusLabel.setText("Status: Send Quiz requested"));
-                    Quiz quiz = new Quiz();
-                    String sendQuizResponse = activeClient.sendQuiz(quiz);
-                    Platform.runLater(() -> clientStatusLabel.setText("Response: " + sendQuizResponse));
                 }
-            } catch (Exception e) {
-                handleConnectionLost("Connection Lost (Server Offline)");
             }
         });
     }
@@ -192,7 +197,7 @@ public class NodeController {
     }
 
     private void handleConnectionLost(String message) {
-        stopHeartbeat();
+        //stopHeartbeat();
         if (activeClient != null) {
             try {
                 activeClient.shutdown();
@@ -200,8 +205,12 @@ public class NodeController {
             activeClient = null;
         }
         Platform.runLater(() -> {
+            leaderInfoMessage infoMessage = leaderInfoCommunication.getLeader();
+            leaderIp = infoMessage.getIp();
+            leaderPort = infoMessage.getPort();
+            activeClient = new ClientNode(leaderIp, leaderPort);
             clientStatusLabel.setText("Status: " + message);
-            connectClientBtn.setDisable(false);
+            /*connectClientBtn.setDisable(false);
             setServiceButtonsVisible(false);
             setListVisible(false);
             if (quizList != null) {
@@ -209,7 +218,7 @@ public class NodeController {
             }
             if (quizListView != null) {
                 quizListView.getItems().clear();
-            }
+            }*/
         });
     }
 

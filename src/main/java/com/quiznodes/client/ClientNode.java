@@ -2,6 +2,7 @@ package com.quiznodes.client;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import com.quiznodes.proto.Empty;
 import com.quiznodes.proto.questionMessage;
@@ -14,6 +15,8 @@ import com.quiznodes.server.types.*;
 
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 
 public class ClientNode {
     private final ManagedChannel channel;
@@ -46,7 +49,7 @@ public class ClientNode {
                 return null;
             }
             quizId request = quizId.newBuilder().setId(id).build();
-            quizMessage response = blockingStub.getQuiz(request);
+            quizMessage response = blockingStub.withDeadlineAfter(3, TimeUnit.SECONDS).getQuiz(request);
 
             String newId = response.getId();
             Quiz quiz = new Quiz(newId);
@@ -59,7 +62,10 @@ public class ClientNode {
             }
             return quiz;
 
-        } catch (Exception e) {
+        } catch (StatusRuntimeException e) {
+            if (e.getStatus().getCode() == Status.Code.DEADLINE_EXCEEDED) {
+                throw new StatusRuntimeException(e.getStatus());
+            }
             System.err.println("ERROR: " + e.getMessage());
             e.printStackTrace();
         }
@@ -83,9 +89,12 @@ public class ClientNode {
                 q.build();
                 request.addQuestions(q);
             }
-            quizId response = blockingStub.sendQuiz(request.build());
+            quizId response = blockingStub.withDeadlineAfter(3, TimeUnit.SECONDS).sendQuiz(request.build());
             return response.getId();
-        } catch (Exception e) {
+        } catch (StatusRuntimeException e) {
+            if (e.getStatus().getCode() == Status.Code.DEADLINE_EXCEEDED) {
+                throw new StatusRuntimeException(e.getStatus());
+            }
             System.err.println("ERROR: " + e.getMessage());
             e.printStackTrace();
         }
@@ -96,7 +105,7 @@ public class ClientNode {
     public List<Quiz> getAllQuiz() {
         try {
             Empty request = Empty.newBuilder().build();
-            quizList response = blockingStub.getAllQuiz(request); 
+            quizList response = blockingStub.withDeadlineAfter(3, TimeUnit.SECONDS).getAllQuiz(request);
             
             List<Quiz> quizzes = new ArrayList<>();
             for (quizMessage qMsg : response.getQuizzesList()) {
@@ -108,7 +117,10 @@ public class ClientNode {
                 quizzes.add(quiz);
             }
             return quizzes;
-        } catch (Exception e) {
+        } catch (StatusRuntimeException e) {
+            if(e.getStatus().getCode() == Status.Code.DEADLINE_EXCEEDED){
+                throw new StatusRuntimeException(e.getStatus());
+            }
             System.err.println("ERROR: " + e.getMessage());
             e.printStackTrace();
         }
