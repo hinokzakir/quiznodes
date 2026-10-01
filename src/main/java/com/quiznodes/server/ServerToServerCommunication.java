@@ -56,4 +56,16 @@ public class ServerToServerCommunication {
         joinMessage message = joinMessage.newBuilder().setIp(ip).setPort(port).build();
         stub.joinNetwork(message);
     }
+
+    public responseVoteMessage requestVote(String ip, int port, long term) {
+        requestVoteMessage message = requestVoteMessage.newBuilder()
+            .setIp(ip)
+            .setPort(port)
+            .setTerm(term)
+            .build();
+        
+        // handle response from other node
+        responseVoteMessage response = stub.requestVote(message);
+        return response;     
+    }
 }
