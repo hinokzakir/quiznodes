@@ -6,14 +6,18 @@ import com.quiznodes.server.types.Question;
 import com.quiznodes.server.types.Quiz;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class ServerToServerCommunication {
     private serverToServerCommunicationGrpc.serverToServerCommunicationBlockingStub stub;
+    ManagedChannel channel;
 
     public ServerToServerCommunication(String host, int port) {
-        ManagedChannel channel = ManagedChannelBuilder.forAddress(host, port).usePlaintext().build();
+        channel = ManagedChannelBuilder.forAddress(host, port).usePlaintext().build();
         stub = serverToServerCommunicationGrpc.newBlockingStub(channel);
     }
 
@@ -36,15 +40,29 @@ public class ServerToServerCommunication {
             }
             replicateResponse response = stub.replicateQuiz(request.build());
             return response.getAvailableCapacity();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        } catch (StatusRuntimeException e) {
+            if(e.getStatus().getCode() == Status.Code.DEADLINE_EXCEEDED
+                    ||  e.getStatus().getCode() == Status.Code.UNAVAILABLE) {
+                System.out.println("Replicate Quiz failed");
+                return -1;
+            }
+            throw e;
         }
     }
 
     public long sendLeaderHeartbeat() {
-        heartbeatResponse response = stub.sendLeaderHeartbeat(Empty.newBuilder().build());
-        System.out.println("Got Capacity:" + response.getAvailableCapacity());
-        return response.getAvailableCapacity();
+        try {
+            heartbeatResponse response = stub.withDeadlineAfter(3, TimeUnit.SECONDS).sendLeaderHeartbeat(Empty.newBuilder().build());
+            System.out.println("Got Capacity:" + response.getAvailableCapacity());
+            return response.getAvailableCapacity();
+        }catch (StatusRuntimeException e) {
+            if(e.getStatus().getCode() == Status.Code.DEADLINE_EXCEEDED
+                    ||  e.getStatus().getCode() == Status.Code.UNAVAILABLE) {
+                System.out.println("Heartbeat Failed");
+                return -1;
+            }
+            throw e;
+        }
     }
 
     public quizMessage getQuiz(String id) {
@@ -67,5 +85,11 @@ public class ServerToServerCommunication {
         // handle response from other node
         responseVoteMessage response = stub.requestVote(message);
         return response;     
+    }
+
+    public void shutdown(){
+        if (channel != null && !channel.isShutdown()) {
+            channel.shutdown();
+        }
     }
 }

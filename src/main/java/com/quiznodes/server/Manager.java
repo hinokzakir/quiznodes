@@ -90,12 +90,18 @@ public class Manager {
 
         Arrays.sort(indices, (a, b) -> Long.compare(capacities.get(b), capacities.get(a)));
         quizToServersMap.put(quiz.getId(), new ArrayList<>());
-        for (int i = 0; i < replicationFactor; i++) {
-            long capacity = servers.get(indices[i]).replicateQuiz(quiz);
-            quizToServersMap.get(quiz.getId()).add(indices[i]);
-            if (capacity < 1) {
-                fullServers.add(indices[i]);
+        indicesIndex = 0;
+        int replicationIndex = 0;
+        while(replicationIndex < replicationFactor && indicesIndex < indices.length){
+            long capacity = servers.get(indices[indicesIndex]).replicateQuiz(quiz);
+            if(capacity > -1) {
+                quizToServersMap.get(quiz.getId()).add(indices[indicesIndex]);
+                if (capacity < 1) {
+                    fullServers.add(indices[indicesIndex]);
+                }
+                replicationIndex++;
             }
+            indicesIndex++;
         }
     }
 
@@ -124,13 +130,30 @@ public class Manager {
 
     public void sendLeaderHeartbeat() {
         double total_capacity = 0;
-        double total_max_capacity = 100 * servers.size();
+        List<Integer> toRemove = new ArrayList<>();
         for (int i = 0; i < servers.size(); i++) {
             ServerToServerCommunication serverToServerCommunication = servers.get(i);
             long capacity = serverToServerCommunication.sendLeaderHeartbeat();
-            capacities.set(i, capacity);
-            total_capacity += capacity;
+            if (capacity > -1){
+                capacities.set(i, capacity);
+                total_capacity += capacity;
+            }else {
+                toRemove.add(i);
+                System.out.println("Should remove" + i);
+            }
         }
+        toRemove.sort(Comparator.reverseOrder());
+        for (int i : toRemove) {
+            System.out.println("Removing server" + i);
+            servers.get(i).shutdown();
+            servers.remove(i);
+            capacities.remove(i);
+            fullServers.remove(i);
+            for(List<Integer> list : quizToServersMap.values()){
+                list.remove(Integer.valueOf(i));
+            }
+        }
+        double total_max_capacity = 100 * servers.size();
         System.out.println("Capacities: " + capacities);
         System.out.println("Calculation: " + total_capacity / total_max_capacity);
         if (total_capacity / total_max_capacity < 0.2) {
