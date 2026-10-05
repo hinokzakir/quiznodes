@@ -242,6 +242,8 @@ public class Manager {
             return;
         }
 
+        List<Integer> serversToRemove = new ArrayList<>();
+
         for(int i: servers.keySet()) {
             if (this.state != 1) {
                 return;
@@ -275,11 +277,14 @@ public class Manager {
                     return;
                 }
                 System.err.println("RequestVote failed (removing dead peer): " + e.getMessage());
-                servers.remove(i);
-                capacities.remove(i);
+                serversToRemove.add(i);
                 totalNodes = servers.size();
                 majority = (totalNodes / 2) + 1;
             }
+        }
+        for(int index: serversToRemove) {
+            servers.remove(index);
+            capacities.remove(index);
         }
     }
 
