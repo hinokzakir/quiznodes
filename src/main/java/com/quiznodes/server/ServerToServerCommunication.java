@@ -14,11 +14,15 @@ import java.util.concurrent.TimeUnit;
 
 public class ServerToServerCommunication {
     private serverToServerCommunicationGrpc.serverToServerCommunicationBlockingStub stub;
+    private String host;
+    private int port;
     ManagedChannel channel;
 
     public ServerToServerCommunication(String host, int port) {
         channel = ManagedChannelBuilder.forAddress(host, port).usePlaintext().build();
         stub = serverToServerCommunicationGrpc.newBlockingStub(channel);
+        this.host = host;
+        this.port = port;
     }
 
     public long replicateQuiz(Quiz quiz) {
@@ -92,4 +96,12 @@ public class ServerToServerCommunication {
             channel.shutdown();
         }
     }
+
+    public int getPort() {
+        return port;
+    }
+    public String getHost() {
+        return host;
+    }
+
 }

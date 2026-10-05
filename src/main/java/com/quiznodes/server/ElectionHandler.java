@@ -33,4 +33,8 @@ public class ElectionHandler {
         return hasVoted;
     }
 
+    public void resetVotes() {
+        votes = 0;
+    }
+
 }
