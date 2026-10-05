@@ -37,6 +37,7 @@
                         <Label styleClass="field-label" text="Port Number" />
                           <Button fx:id="connectClientBtn" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleConnectClient" styleClass="primary-button" text="Connect Client" />
                         <Button fx:id="sendQuizBtn" managed="false" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleSendQuiz" prefHeight="42.0" prefWidth="112.0" styleClass="primary-button" text="Send Quiz" visible="false" />
+                        <Button fx:id="uploadQuizBtn" layoutX="10.0" layoutY="10.0" managed="false" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleUploadQuiz" prefHeight="42.0" prefWidth="112.0" styleClass="primary-button" text="Upload Quiz" visible="false" />
                         <Button fx:id="getQuizBtn" managed="false" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleGetQuiz" prefHeight="42.0" prefWidth="112.0" styleClass="primary-button" text="Get Quiz" visible="false" />
                      </children>
                   </VBox>
