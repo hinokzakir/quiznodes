@@ -39,6 +39,23 @@ public class ServerToServerHandler extends serverToServerCommunicationGrpc.serve
         responseObserver.onCompleted();
     }
 
+    // this is the message sent once to update followers server list
+    @Override
+    public void sendLeaderHeartbeatFirst(heartbeatRequest request, StreamObserver<heartbeatResponse> responseObserver) {
+        long capacity = manager.getServerCapacity();
+        List<serverInfo> leaderServers = request.getServersList();
+        manager.resetElectionTimeout();
+        System.out.println("Received Heartbeat and new server list");
+
+        // here i need to add something to update the availible list of connected peers
+        if(manager.getState() != 0) {
+            manager.updateServerList(leaderServers);
+        }
+
+        responseObserver.onNext(heartbeatResponse.newBuilder().setAvailableCapacity(capacity).build());
+        responseObserver.onCompleted();
+    }
+
     @Override
     public void getQuiz(quizId request, StreamObserver<quizMessage> responseObserver) {
         String id = request.getId();

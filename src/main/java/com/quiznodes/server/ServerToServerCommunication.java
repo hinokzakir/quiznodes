@@ -4,6 +4,8 @@ import com.google.rpc.context.AttributeContext;
 import com.quiznodes.proto.*;
 import com.quiznodes.server.types.Question;
 import com.quiznodes.server.types.Quiz;
+import com.quiznodes.server.types.ServerInfo;
+
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 
@@ -45,8 +47,19 @@ public class ServerToServerCommunication {
         }
     }
 
+    public long sendLeaderHeartbeatFirst(List <serverInfo> servers) {
+        heartbeatRequest.Builder request = heartbeatRequest.newBuilder();
+        for(int i = 0; i < servers.size(); i++) {
+            request.addServers(servers.get(i));
+        }
+        heartbeatResponse response = stub.sendLeaderHeartbeatFirst(request.build());
+        System.out.println("Got Capacity:" + response.getAvailableCapacity());
+        return response.getAvailableCapacity();
+    }
+
     public long sendLeaderHeartbeat() {
-        heartbeatResponse response = stub.sendLeaderHeartbeat(Empty.newBuilder().build());
+        Empty.Builder request = Empty.newBuilder();
+        heartbeatResponse response = stub.sendLeaderHeartbeat(request.build());
         System.out.println("Got Capacity:" + response.getAvailableCapacity());
         return response.getAvailableCapacity();
     }
