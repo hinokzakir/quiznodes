@@ -112,6 +112,7 @@ public class ServerToServerHandler extends serverToServerCommunicationGrpc.serve
 
         if(voteGranted) {
             manager.electionHandler.setHasVoted(voteGranted);
+            manager.resetElectionTimeout();
         }
         System.out.println("Vote requested by " + request.getPort() + " for term " 
             + request.getTerm() + ", granted: " + voteGranted);

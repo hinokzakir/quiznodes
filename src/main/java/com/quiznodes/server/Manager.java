@@ -130,10 +130,18 @@ public class Manager {
         double total_max_capacity = 100 * servers.size();
         for (int i = 0; i < servers.size(); i++) {
             ServerToServerCommunication serverToServerCommunication = servers.get(i);
-            long capacity = serverToServerCommunication.sendLeaderHeartbeat();
-            capacities.set(i, capacity);
-            total_capacity += capacity;
+            try {
+                long capacity = serverToServerCommunication.sendLeaderHeartbeat();
+                capacities.set(i, capacity);
+                total_capacity += capacity;
+            } catch (Exception e) {
+                System.err.println("Failed to heartbeat peer (removing): " + e.getMessage());
+                servers.remove(i);
+                capacities.remove(i);
+                total_max_capacity = 100 * servers.size();
+            }
         }
+        if (servers.isEmpty()) return;
         System.out.println("Capacities: " + capacities);
         System.out.println("Calculation: " + total_capacity / total_max_capacity);
         if (total_capacity / total_max_capacity < 0.2) {
@@ -210,6 +218,7 @@ public class Manager {
     }
 
     public void startElection() {
+        resetElectionTimeout();
         setState(1);
         electionHandler.resetVotes();
         long newTerm = electionHandler.getTerm() + 1;
@@ -280,6 +289,19 @@ public class Manager {
                 capacities.remove(i);
                 totalNodes = servers.size();
                 majority = (totalNodes / 2) + 1;
+                System.out.println("Total Nodes updated: " + totalNodes);
+                if(totalNodes <= 2) {
+                    System.out.println("Only " + totalNodes + " in network. election impossible...");
+
+                    if (isDesignatedSpawner()) {
+                        try {
+                            System.out.println("Spawning new ServerApp");
+                            startNewServer();
+                        } catch (IOException ioe) {
+                            System.err.println("Failed to start new server: " + ioe.getMessage());
+                        }
+                    }
+                }
             }
         }
     }
@@ -287,7 +309,7 @@ public class Manager {
     public synchronized void resetElectionTimeout() {
         // cancel timeout if active
         if (electionTimeoutTask != null && !electionTimeoutTask.isDone()) {
-            electionTimeoutTask.cancel(true);
+            electionTimeoutTask.cancel(false);
         }
 
         if (this.state != 0) {
