@@ -9,6 +9,7 @@ option java_multiple_files = true;
 service serverToServerCommunication {
   rpc replicateQuiz(quizMessage) returns (replicateResponse);
   rpc sendLeaderHeartbeat(Empty) returns (heartbeatResponse);
+  rpc sendLeaderHeartbeatFirst(heartbeatRequest) returns (heartbeatResponse);
   rpc getQuiz (quizId) returns (quizMessage);
   rpc joinNetwork (joinMessage) returns (Empty);
   rpc requestVote (requestVoteMessage) returns (responseVoteMessage);
@@ -34,4 +35,13 @@ message requestVoteMessage{
 message responseVoteMessage{
   uint64 term = 1;
   bool vote_granted = 2;
+}
+
+message heartbeatRequest {
+  repeated serverInfo servers = 1;
+}
+
+message serverInfo {
+  string ip = 1;
+  int32 port = 2;
 }

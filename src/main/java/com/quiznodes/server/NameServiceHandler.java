@@ -55,8 +55,12 @@ public class NameServiceHandler {
                 }
 
                 manager.addServer(nodeIp, nodePort);
-                manager.joinNetwork();
-                System.out.println("Connecting to node " + nodeName + " at " + nodeIp + ":" + nodePort);
+                try {
+                    manager.joinNetwork();
+                    System.out.println("Connecting to node " + nodeName + " at " + nodeIp + ":" + nodePort);
+                } catch (Exception e) {
+                    System.err.println("Could not connect to stale node " + nodeIp + ":" + nodePort + " - ignoring.");
+                }
                 // this is when i we know how to connect server nodes
                 // boolean ok = connect(nodeIp, nodePort);
                 // System.out.println("Connect to " + nodeName + " -> " + (ok ? "OK" :

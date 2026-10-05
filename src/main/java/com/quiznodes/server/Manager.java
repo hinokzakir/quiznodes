@@ -4,9 +4,12 @@ import com.quiznodes.proto.questionMessage;
 import com.quiznodes.server.LeaderInfoCommunication;
 import com.quiznodes.proto.quizMessage;
 import com.quiznodes.proto.responseVoteMessage;
+import com.quiznodes.proto.serverInfo;
 import com.quiznodes.server.types.NodeInfo;
 import com.quiznodes.server.types.Question;
 import com.quiznodes.server.types.Quiz;
+//import com.quiznodes.server.types.ServerInfo;
+import com.quiznodes.server.types.ServerInfo;
 
 import java.io.IOException;
 import java.util.*;
@@ -158,6 +161,7 @@ public class Manager {
                 list.remove(Integer.valueOf(i));
             }
         }
+        if (servers.isEmpty()) return;
         double total_max_capacity = 100 * servers.size();
         System.out.println("Capacities: " + capacities);
         System.out.println("Calculation: " + total_capacity / total_max_capacity);
@@ -170,6 +174,31 @@ public class Manager {
         }
     }
 
+    public void sendLeaderHeartbeatFirst() {
+        System.out.println("Sending my list of nodes, amount: " + servers.size());
+        double total_capacity = 0;
+        double total_max_capacity = 100 * servers.size();
+        List<serverInfo> serverInfoList = new ArrayList<>();
+        for(ServerToServerCommunication s : servers.values()){
+            serverInfo server = serverInfo.newBuilder().setIp(s.getHost()).setPort(s.getPort()).build();
+            serverInfoList.add(server);
+        }
+        for (int i = 0; i < servers.size(); i++) {
+            ServerToServerCommunication serverToServerCommunication = servers.get(i);
+            long capacity = serverToServerCommunication.sendLeaderHeartbeatFirst(serverInfoList);
+            capacities.put(i, capacity);
+            total_capacity += capacity;
+        }
+        System.out.println("Capacities: " + capacities);
+        System.out.println("Calculation: " + total_capacity / total_max_capacity);
+        if (total_capacity / total_max_capacity < 0.2) {
+            try {
+                startNewServer();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
     public List<Quiz> getAllQuizList() {
         return serverBackend.getAllQuizList();
     }
@@ -202,6 +231,7 @@ public class Manager {
             electionTimeoutTask.cancel(false);
         }
         leaderInfoCommunication.addLeader(server.getIp(), server.getPort());
+        sendLeaderHeartbeatFirst();
         startLeaderHeartbeat();
     }
 
@@ -210,6 +240,7 @@ public class Manager {
     }
 
     public void startElection() {
+        resetElectionTimeout();
         setState(1);
         electionHandler.resetVotes();
         long newTerm = electionHandler.getTerm() + 1;
@@ -218,7 +249,8 @@ public class Manager {
         electionHandler.increaseVote();
 
         int totalNodes = servers.size();
-        int majority = (totalNodes / 2) + 1;
+        int majority;
+        majority = (totalNodes / 2) + 1;
 
         System.out.println("Starting election term " + newTerm + ", votes: " 
             + electionHandler.getVotes() + "/" + majority);
@@ -280,6 +312,19 @@ public class Manager {
                 serversToRemove.add(i);
                 totalNodes = servers.size();
                 majority = (totalNodes / 2) + 1;
+                System.out.println("Total Nodes updated: " + totalNodes);
+                if(totalNodes <= 2) {
+                    System.out.println("Only " + totalNodes + " in network. election impossible...");
+
+                    if (isDesignatedSpawner()) {
+                        try {
+                            System.out.println("Spawning new ServerApp");
+                            startNewServer();
+                        } catch (IOException ioe) {
+                            System.err.println("Failed to start new server: " + ioe.getMessage());
+                        }
+                    }
+                }
             }
         }
         for(int index: serversToRemove) {
@@ -291,7 +336,7 @@ public class Manager {
     public synchronized void resetElectionTimeout() {
         // cancel timeout if active
         if (electionTimeoutTask != null && !electionTimeoutTask.isDone()) {
-            electionTimeoutTask.cancel(true);
+            electionTimeoutTask.cancel(false);
         }
 
         if (this.state != 0) {
@@ -354,7 +399,7 @@ public class Manager {
     }
 
     private boolean isDesignatedSpawner() {
-        // Example: The node with the smallest port number is responsible for spawning
+        // test for deploying new server node
         int myPort = server.getPort();
         for (ServerToServerCommunication peer : servers.values()) {
             if (peer.getPort() < myPort) {
@@ -362,6 +407,52 @@ public class Manager {
             }
         }
         return true; // I have the lowest port among all active nodes
+    }
+
+    public synchronized void updateServerList(List<serverInfo> newServerList) {
+        Set<String> leaderServerKeys = new HashSet<>();
+
+        for(serverInfo info : newServerList){
+            String ip = info.getIp();
+            int port = info.getPort();
+            if(ip.equals(server.getIp()) && port == server.getPort()) {
+                continue;
+            }
+            String key = ip + ":" + port;
+            leaderServerKeys.add(key);
+
+            boolean exists = false;
+            for(ServerToServerCommunication peer : servers.values()) {
+                if (peer.getHost().equals(ip) && peer.getPort() == port){
+                    exists = true;
+                    break;
+                }
+            }
+
+            if(!exists){
+                addServer(ip, port);
+            }
+        }
+
+        List<Integer> toRemove = new ArrayList<>();
+
+        for (int id:servers.keySet()) {
+            ServerToServerCommunication peer = servers.get(id);
+            String peerKey = peer.getHost() + ":" + peer.getPort();
+
+            if (!leaderServerKeys.contains(peerKey)) {
+                System.out.println("Removing obsolete server connection: " + peerKey);
+                toRemove.add(id);
+            }
+        }
+
+        for (int id : toRemove) {
+            servers.remove(id);
+        }
+    }
+
+    public int getState() {
+        return state;
     }
 
     public static void main(String[] args) throws Exception {
