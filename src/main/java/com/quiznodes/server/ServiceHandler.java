@@ -39,6 +39,7 @@ public class ServiceHandler extends serviceHandlerGrpc.serviceHandlerImplBase {
         for(Quiz q : quizzes) {
             quizMessage.Builder quiz = quizMessage.newBuilder();
             quiz.setId(q.getId());
+            quiz.setName(q.getName());
             for(Question question : q.getQuestions()){
                 questionMessage questionmessage = questionMessage.newBuilder()
                     .setQuestion(question.getQuestion())
@@ -59,7 +60,8 @@ public class ServiceHandler extends serviceHandlerGrpc.serviceHandlerImplBase {
     public void sendQuiz(quizMessage request, StreamObserver<quizId> responseObserver) {
         int count = request.getQuestionsCount();
         String quizIdString = request.getId();
-        Quiz quiz = new Quiz(request.getId());
+        String quizName = request.getName();
+        Quiz quiz = new Quiz(quizIdString, quizName);
 
         for (int i = 0; i < count; i++) {
             String qid = request.getQuestions(i).getId();

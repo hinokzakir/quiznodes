@@ -25,7 +25,7 @@ public class ServerToServerCommunication {
 
     public long replicateQuiz(Quiz quiz) {
         try {
-            quizMessage.Builder request = quizMessage.newBuilder().setId(quiz.getId());
+            quizMessage.Builder request = quizMessage.newBuilder().setId(quiz.getId()).setName(quiz.getName());
             List<Question> questions = quiz.getQuestions();
             for (Question question : questions) {
                 questionMessage.Builder q = questionMessage.newBuilder()
