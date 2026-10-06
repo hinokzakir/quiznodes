@@ -180,6 +180,7 @@ public class Manager {
         double total_max_capacity = 100 * servers.size();
         List<serverInfo> serverInfoList = new ArrayList<>();
         for(ServerToServerCommunication s : servers.values()){
+            System.out.println(s.getPort());
             serverInfo server = serverInfo.newBuilder().setIp(s.getHost()).setPort(s.getPort()).build();
             serverInfoList.add(server);
         }
@@ -274,8 +275,6 @@ public class Manager {
             return;
         }
 
-        List<Integer> serversToRemove = new ArrayList<>();
-
         for(int i: servers.keySet()) {
             if (this.state != 1) {
                 return;
@@ -309,7 +308,8 @@ public class Manager {
                     return;
                 }
                 System.err.println("RequestVote failed (removing dead peer): " + e.getMessage());
-                serversToRemove.add(i);
+                servers.remove(i);
+                capacities.remove(i);
                 totalNodes = servers.size();
                 majority = (totalNodes / 2) + 1;
                 System.out.println("Total Nodes updated: " + totalNodes);
@@ -326,10 +326,6 @@ public class Manager {
                     }
                 }
             }
-        }
-        for(int index: serversToRemove) {
-            servers.remove(index);
-            capacities.remove(index);
         }
     }
 
