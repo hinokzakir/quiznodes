@@ -33,6 +33,7 @@ public class Manager {
     public ElectionHandler electionHandler; // under construction
     private ScheduledFuture<?> electionTimeoutTask;
     private static AtomicInteger nextServerId = new AtomicInteger(0);
+    boolean startUpFlag = false;
 
     public Manager(int port, int max_capacity, boolean isLeader) throws Exception {
         serverBackend = new ServerBackend(max_capacity);
@@ -150,12 +151,14 @@ public class Manager {
             }
         }
         toRemove.sort(Comparator.reverseOrder());
-        if(servers.size() - toRemove.size() < 3){
+        if(servers.size() - toRemove.size() < 3 && startUpFlag){
             try {
                 startNewServer();
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
+        } else if(servers.size() - toRemove.size() >= 3){
+            startUpFlag = true;
         }
         for (int i : toRemove) {
             System.out.println("Removing server" + i);
