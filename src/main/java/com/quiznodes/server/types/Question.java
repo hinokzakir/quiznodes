@@ -16,6 +16,13 @@ public class Question {
         this.choices = choices;
     }
 
+    public Question(String id, String question, String correctAnswer, List<String> choices) {
+        this.id = id;
+        this.question = question;
+        this.correctAnswer = correctAnswer;
+        this.choices = choices;
+    }
+
     public String getQuestion() {
         return question;
     }

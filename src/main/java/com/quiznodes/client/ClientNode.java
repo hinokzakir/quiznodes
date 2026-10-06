@@ -36,7 +36,7 @@ public class ClientNode {
 
             return response.getMsg();
         } catch (StatusRuntimeException e) {
-            if(e.getStatus().getCode() == Status.Code.DEADLINE_EXCEEDED) {
+            if (e.getStatus().getCode() == Status.Code.DEADLINE_EXCEEDED) {
                 throw new StatusRuntimeException(e.getStatus());
             }
             System.err.println("ERROR: " + e.getMessage());
@@ -48,7 +48,7 @@ public class ClientNode {
 
     public Quiz getQuiz(String id) {
         try {
-            if(id == null){
+            if (id == null) {
                 return null;
             }
             quizId request = quizId.newBuilder().setId(id).build();
@@ -60,7 +60,8 @@ public class ClientNode {
                 String qid = q.getId();
                 String correct = q.getCorrectAnswer();
                 List<String> choices = q.getChoicesList();
-                Question question = new Question(qid, correct, choices);
+                String questionString = q.getQuestion();
+                Question question = new Question(qid, questionString, correct, choices);
                 quiz.addQuestion(question);
             }
             return quiz;
@@ -109,19 +110,20 @@ public class ClientNode {
         try {
             Empty request = Empty.newBuilder().build();
             quizList response = blockingStub.withDeadlineAfter(3, TimeUnit.SECONDS).getAllQuiz(request);
-            
+
             List<Quiz> quizzes = new ArrayList<>();
             for (quizMessage qMsg : response.getQuizzesList()) {
                 Quiz quiz = new Quiz(qMsg.getId());
                 for (questionMessage qm : qMsg.getQuestionsList()) {
-                    Question question = new Question(qm.getId(), qm.getCorrectAnswer(), qm.getChoicesList());
+                    Question question = new Question(qm.getId(), qm.getQuestion(), qm.getCorrectAnswer(),
+                            qm.getChoicesList());
                     quiz.addQuestion(question);
                 }
                 quizzes.add(quiz);
             }
             return quizzes;
         } catch (StatusRuntimeException e) {
-            if(e.getStatus().getCode() == Status.Code.DEADLINE_EXCEEDED){
+            if (e.getStatus().getCode() == Status.Code.DEADLINE_EXCEEDED) {
                 throw new StatusRuntimeException(e.getStatus());
             }
             System.err.println("ERROR: " + e.getMessage());
