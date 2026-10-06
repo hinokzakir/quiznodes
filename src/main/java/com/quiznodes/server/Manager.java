@@ -184,7 +184,7 @@ public class Manager {
             serverInfo server = serverInfo.newBuilder().setIp(s.getHost()).setPort(s.getPort()).build();
             serverInfoList.add(server);
         }
-        for (int i = 0; i < servers.size(); i++) {
+        for (int i: servers.keySet()) {
             ServerToServerCommunication serverToServerCommunication = servers.get(i);
             long capacity = serverToServerCommunication.sendLeaderHeartbeatFirst(serverInfoList);
             capacities.put(i, capacity);
@@ -275,7 +275,7 @@ public class Manager {
             return;
         }
 
-        for(int i: servers.keySet()) {
+        for(int i: new ArrayList<>(servers.keySet())) {
             if (this.state != 1) {
                 return;
             }
@@ -284,7 +284,7 @@ public class Manager {
                 System.out.println("Sending RequestVote...");
                 responseVoteMessage response = peer.requestVote(server.getIp(), server.getPort(), newTerm);
                 System.out.println("Vote result: " + response.getVoteGranted() + " (term: " + response.getTerm() + ")");
-                // cancel election if current term is to low
+                // cancel election if current term is too low
                 if (response.getTerm() > electionHandler.getTerm()) {
                     setState(2);
                     electionHandler.setTerm(response.getTerm());
@@ -444,6 +444,7 @@ public class Manager {
 
         for (int id : toRemove) {
             servers.remove(id);
+            capacities.remove(id);
         }
     }
 
