@@ -1,10 +1,12 @@
 package com.quiznodes.server;
 
+import com.quiznodes.proto.questionMessage;
 import com.quiznodes.server.LeaderInfoCommunication;
 import com.quiznodes.proto.quizMessage;
 import com.quiznodes.proto.responseVoteMessage;
 import com.quiznodes.proto.serverInfo;
 import com.quiznodes.server.types.NodeInfo;
+import com.quiznodes.server.types.Question;
 import com.quiznodes.server.types.Quiz;
 //import com.quiznodes.server.types.ServerInfo;
 import com.quiznodes.server.types.ServerInfo;
@@ -15,13 +17,14 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class Manager {
     private ServerBackend serverBackend;
     private ServerNode server;
     private int state; // 0 = leader , 1 = candidate , 2 = follower
-    private List<ServerToServerCommunication> servers = new ArrayList<>();
-    private List<Long> capacities = new ArrayList<>();
+    private Map<Integer, ServerToServerCommunication> servers = new HashMap<>();
+    private Map<Integer,Long> capacities = new HashMap<>();
     private Set<Integer> fullServers = new HashSet<>();
     private Map<String, List<Integer>> quizToServersMap = new HashMap<>();
     private final ScheduledExecutorService heartbeatScheduler = Executors.newSingleThreadScheduledExecutor();
@@ -29,6 +32,7 @@ public class Manager {
     private LeaderInfoCommunication leaderInfoCommunication;
     public ElectionHandler electionHandler; // under construction
     private ScheduledFuture<?> electionTimeoutTask;
+    private static AtomicInteger nextServerId = new AtomicInteger(0);
 
     public Manager(int port, int max_capacity, boolean isLeader) throws Exception {
         serverBackend = new ServerBackend(max_capacity);
@@ -45,8 +49,9 @@ public class Manager {
     }
 
     public void addServer(String host, int port) {
-        servers.add(new ServerToServerCommunication(host, port));
-        capacities.add(0L);
+        int id = nextServerId.getAndIncrement();
+        servers.put(id,new ServerToServerCommunication(host, port));
+        capacities.put(id, 0L);
         System.out.println("Server added" + host + ":" + port);
     }
 
@@ -82,22 +87,27 @@ public class Manager {
         } else {
             replicationFactor = 3;
         }
-        Integer[] indices = new Integer[capacities.size() - fullServers.size()];
-        int indicesIndex = 0;
-        for (int i = 0; i < capacities.size(); i++) {
-            if (!fullServers.contains(i)) {
-                indices[indicesIndex] = i;
-                indicesIndex++;
+        List<Integer> indices = new ArrayList<>();
+        for(int id: servers.keySet()) {
+            if(!fullServers.contains(id)) {
+                indices.add(id);
             }
         }
 
-        Arrays.sort(indices, (a, b) -> Long.compare(capacities.get(b), capacities.get(a)));
+        indices.sort((a, b) -> Long.compare(capacities.get(b), capacities.get(a)));
         quizToServersMap.put(quiz.getId(), new ArrayList<>());
-        for (int i = 0; i < replicationFactor; i++) {
-            long capacity = servers.get(indices[i]).replicateQuiz(quiz);
-            quizToServersMap.get(quiz.getId()).add(indices[i]);
-            if (capacity < 1) {
-                fullServers.add(indices[i]);
+        int replicationIndex = 0;
+        for(int id: indices) {
+            long capacity = servers.get(id).replicateQuiz(quiz);
+            if(capacity > -1) {
+                quizToServersMap.get(quiz.getId()).add(id);
+                if (capacity < 1) {
+                    fullServers.add(id);
+                }
+                replicationIndex++;
+            }
+            if(replicationIndex == replicationFactor) {
+                break;
             }
         }
     }
@@ -127,21 +137,32 @@ public class Manager {
 
     public void sendLeaderHeartbeat() {
         double total_capacity = 0;
-        double total_max_capacity = 100 * servers.size();
-        for (int i = 0; i < servers.size(); i++) {
+        List<Integer> toRemove = new ArrayList<>();
+        for (int i: servers.keySet()) {
             ServerToServerCommunication serverToServerCommunication = servers.get(i);
-            try {
-                long capacity = serverToServerCommunication.sendLeaderHeartbeat();
-                capacities.set(i, capacity);
+            long capacity = serverToServerCommunication.sendLeaderHeartbeat();
+            if (capacity > -1){
+                capacities.put(i, capacity);
                 total_capacity += capacity;
-            } catch (Exception e) {
-                System.err.println("Failed to heartbeat peer (removing): " + e.getMessage());
-                servers.remove(i);
-                capacities.remove(i);
-                total_max_capacity = 100 * servers.size();
+            }else {
+                toRemove.add(i);
+                System.out.println("Should remove" + i);
+            }
+        }
+        toRemove.sort(Comparator.reverseOrder());
+        for (int i : toRemove) {
+            System.out.println("Removing server" + i);
+            servers.get(i).shutdown();
+            servers.remove(i);
+            capacities.remove(i);
+            fullServers.remove(i);
+            redistributeRemovedServerQuizzes(i, toRemove);
+            for(List<Integer> list : quizToServersMap.values()){
+                list.remove(Integer.valueOf(i));
             }
         }
         if (servers.isEmpty()) return;
+        double total_max_capacity = 100 * servers.size();
         System.out.println("Capacities: " + capacities);
         System.out.println("Calculation: " + total_capacity / total_max_capacity);
         if (total_capacity / total_max_capacity < 0.2) {
@@ -158,14 +179,15 @@ public class Manager {
         double total_capacity = 0;
         double total_max_capacity = 100 * servers.size();
         List<serverInfo> serverInfoList = new ArrayList<>();
-        for(ServerToServerCommunication s : servers){
+        for(ServerToServerCommunication s : servers.values()){
+            System.out.println(s.getPort());
             serverInfo server = serverInfo.newBuilder().setIp(s.getHost()).setPort(s.getPort()).build();
             serverInfoList.add(server);
         }
         for (int i = 0; i < servers.size(); i++) {
             ServerToServerCommunication serverToServerCommunication = servers.get(i);
             long capacity = serverToServerCommunication.sendLeaderHeartbeatFirst(serverInfoList);
-            capacities.set(i, capacity);
+            capacities.put(i, capacity);
             total_capacity += capacity;
         }
         System.out.println("Capacities: " + capacities);
@@ -178,7 +200,6 @@ public class Manager {
             }
         }
     }
-
     public List<Quiz> getAllQuizList() {
         return serverBackend.getAllQuizList();
     }
@@ -200,7 +221,9 @@ public class Manager {
     }
 
     public void joinNetwork() {
-        servers.getLast().joinNetwork(server.getIp(), server.getPort());
+        System.out.println(servers.keySet());
+        System.out.println(nextServerId.intValue());
+        servers.get(nextServerId.get() - 1).joinNetwork(server.getIp(), server.getPort());
     }
 
     public void setIamLeader() {
@@ -252,7 +275,7 @@ public class Manager {
             return;
         }
 
-        for(int i = 0; i < servers.size(); i++) {
+        for(int i: servers.keySet()) {
             if (this.state != 1) {
                 return;
             }
@@ -321,11 +344,60 @@ public class Manager {
             }, timeoutSeconds, TimeUnit.SECONDS);
         }
     }
+    public void redistributeRemovedServerQuizzes(int serverIndex, List<Integer> serversToRemove) {
+        for(String quizId: quizToServersMap.keySet()){
+            List<Integer> serversToNotReplicateTo = quizToServersMap.get(quizId);
+            if(serversToNotReplicateTo.contains(serverIndex)) {
+                int serverToGetQuizFrom = -1;
+                for (int server : serversToNotReplicateTo) {
+                    if (!serversToRemove.contains(server)) {
+                        serverToGetQuizFrom = server;
+                        break;
+                    }
+                }
+                if (serverToGetQuizFrom == -1) {
+                    System.out.println("Quiz Lost: " + quizId);
+                } else {
+                    Quiz quiz = buildQuiz(servers.get(serverToGetQuizFrom).getQuiz(quizId));
+
+                    List<Integer> indices = new ArrayList<>();
+                    for (int i : servers.keySet()) {
+                        if (!fullServers.contains(i) && !serversToRemove.contains(i) && !serversToNotReplicateTo.contains(i)) {
+                            indices.add(i);
+                        }
+                    }
+
+                    if(indices.isEmpty()) {
+                        System.out.println("No server to replicate quiz to :" + quizId);
+                        continue;
+                    }
+
+                    indices.sort((a, b) -> Long.compare(capacities.get(b), capacities.get(a)));
+                    int serverToReplicateTo = indices.getFirst();
+                    quizToServersMap.get(quizId).add(serverToReplicateTo);
+                    servers.get(serverToReplicateTo).replicateQuiz(quiz);
+                }
+            }
+        }
+    }
+
+    private Quiz buildQuiz (quizMessage response){
+        String newId = response.getId();
+        Quiz quiz = new Quiz(newId);
+        for (questionMessage q : response.getQuestionsList()) {
+            String qid = q.getId();
+            String correct = q.getCorrectAnswer();
+            List<String> choices = q.getChoicesList();
+            Question question = new Question(qid, correct, choices);
+            quiz.addQuestion(question);
+        }
+        return quiz;
+    }
 
     private boolean isDesignatedSpawner() {
         // test for deploying new server node
         int myPort = server.getPort();
-        for (ServerToServerCommunication peer : servers) {
+        for (ServerToServerCommunication peer : servers.values()) {
             if (peer.getPort() < myPort) {
                 return false; // A peer has a lower port, let them spawn it
             }
@@ -346,7 +418,7 @@ public class Manager {
             leaderServerKeys.add(key);
 
             boolean exists = false;
-            for(ServerToServerCommunication peer : servers) {
+            for(ServerToServerCommunication peer : servers.values()) {
                 if (peer.getHost().equals(ip) && peer.getPort() == port){
                     exists = true;
                     break;
@@ -358,14 +430,21 @@ public class Manager {
             }
         }
 
-        servers.removeIf(peer -> {
-                    String peerKey = peer.getHost() + ":" + peer.getPort();
-                    boolean keep = leaderServerKeys.contains(peerKey);
-                    if (!keep) {
-                        System.out.println("Removing obsolete server connection: " + peerKey);
-                    }
-                    return !keep;
-                });
+        List<Integer> toRemove = new ArrayList<>();
+
+        for (int id:servers.keySet()) {
+            ServerToServerCommunication peer = servers.get(id);
+            String peerKey = peer.getHost() + ":" + peer.getPort();
+
+            if (!leaderServerKeys.contains(peerKey)) {
+                System.out.println("Removing obsolete server connection: " + peerKey);
+                toRemove.add(id);
+            }
+        }
+
+        for (int id : toRemove) {
+            servers.remove(id);
+        }
     }
 
     public int getState() {
