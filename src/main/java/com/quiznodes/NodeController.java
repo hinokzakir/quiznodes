@@ -6,21 +6,32 @@ import com.quiznodes.server.Manager;
 import com.quiznodes.server.types.*;
 
 import com.quiznodes.client.ClientNode;
+import com.quiznodes.client.JsonConverter;
 import com.quiznodes.server.ServerNode;
 import io.grpc.StatusRuntimeException;
 import javafx.collections.FXCollections;
+import javafx.event.ActionEvent;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.geometry.Insets;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ListView;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import javafx.stage.Window;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.io.File;
+
 import java.util.List;
 
 public class NodeController {
@@ -36,6 +47,9 @@ public class NodeController {
 
     @FXML
     private Button sendQuizBtn;
+
+    @FXML
+    private Button uploadQuizBtn;
 
     @FXML
     private Button getQuizBtn;
@@ -63,6 +77,60 @@ public class NodeController {
         leaderInfoMessage response = leaderInfoCommunication.getLeader();
         this.leaderIp = response.getIp();
         this.leaderPort = response.getPort();
+
+        quizListView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue != null) {
+                System.out.println("Selected item: " + newValue.getId());
+                handleListItem(newValue);
+            }
+        });
+
+    }
+
+    @FXML
+    private void handleUploadQuiz(ActionEvent event) {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Select Quiz JSON File");
+
+        FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("JSON files (*.json)", "*.json");
+        fileChooser.getExtensionFilters().add(extFilter);
+
+        Window stage = sendQuizBtn.getScene().getWindow();
+        File selectedFile = fileChooser.showOpenDialog(stage);
+
+        if (selectedFile != null) {
+            System.out.println("Selected file: " + selectedFile.getAbsolutePath());
+
+            // Use your JsonConverter to parse the file
+            JsonConverter converter = new JsonConverter();
+            Quiz newQuiz = converter.convertQuiz(selectedFile);
+
+            if (newQuiz != null) {
+                System.out.println("Quiz successfully parsed!");
+                CompletableFuture.runAsync(() -> {
+                    boolean retry = true;
+                    while (retry) {
+                        try {
+                            String response = activeClient.testRequestString("ping");
+                            if (response == null || response.isEmpty()) {
+                                handleConnectionLost("Connection Lost (Server Offline)");
+                            } else {
+                                Platform.runLater(() -> clientStatusLabel.setText("Status: Send Quiz requested"));
+                                String sendQuizResponse = activeClient.sendQuiz(newQuiz);
+                                Platform.runLater(() -> clientStatusLabel.setText("Response: " + sendQuizResponse));
+                                retry = false;
+                            }
+                        } catch (Exception e) {
+                            handleConnectionLost("Connection Lost (Server Offline)");
+                        }
+                    }
+                });
+            } else {
+                System.err.println("Failed to parse the quiz file.");
+            }
+        } else {
+            System.out.println("File selection cancelled.");
+        }
 
     }
 
@@ -134,7 +202,7 @@ public class NodeController {
                         Platform.runLater(() -> clientStatusLabel.setText("Response: " + sendQuizResponse));
                         retry = false;
                     }
-                }  catch (Exception e) {
+                } catch (Exception e) {
                     handleConnectionLost("Connection Lost (Server Offline)");
                 }
             }
@@ -159,6 +227,38 @@ public class NodeController {
                 handleConnectionLost("Connection Lost (Server Offline)");
             }
         });
+    }
+
+    @FXML
+    private void handleListItem(Quiz quiz) {
+        Stage popupStage = new Stage();
+        // block interaction with the main window until this popup is closed
+        popupStage.initModality(Modality.APPLICATION_MODAL); 
+        popupStage.setTitle("Quiz"); // will change to quizname when it is fixed
+
+        VBox contentBox = new VBox(15); // 15 pixels of spacing between items
+        contentBox.setPadding(new Insets(20));
+
+        // add all questions
+        for (int i = 0; i < quiz.getQuestions().size(); i++) {
+            Question question = quiz.getQuestions().get(i);
+            
+            Label questionLabel = new Label((i + 1) + ". " + question.getQuestion());
+            questionLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 14px;");
+            contentBox.getChildren().add(questionLabel);
+            for (String alternative : question.getChoices()) {
+                Label altLabel = new Label("   • " + alternative);
+                contentBox.getChildren().add(altLabel);
+            }
+        }
+
+        ScrollPane scrollPane = new ScrollPane(contentBox);
+        scrollPane.setFitToWidth(true); 
+        scrollPane.setStyle("-fx-background-color: transparent;");
+
+        Scene scene = new Scene(scrollPane, 400, 500); // width: 400, height: 500
+        popupStage.setScene(scene);
+        popupStage.show();
     }
 
     private void startHeartbeat() {
@@ -203,7 +303,7 @@ public class NodeController {
     }
 
     private void handleConnectionLost(String message) {
-        //stopHeartbeat();
+        // stopHeartbeat();
         if (activeClient != null) {
             try {
                 activeClient.shutdown();
@@ -228,6 +328,10 @@ public class NodeController {
         if (getQuizBtn != null) {
             getQuizBtn.setVisible(visible);
             getQuizBtn.setManaged(visible);
+        }
+        if (uploadQuizBtn != null) {
+            uploadQuizBtn.setVisible(visible);
+            uploadQuizBtn.setManaged(visible);
         }
     }
 
