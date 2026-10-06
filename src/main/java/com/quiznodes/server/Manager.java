@@ -150,6 +150,13 @@ public class Manager {
             }
         }
         toRemove.sort(Comparator.reverseOrder());
+        if(servers.size() - toRemove.size() < 3){
+            try {
+                startNewServer();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
         for (int i : toRemove) {
             System.out.println("Removing server" + i);
             servers.get(i).shutdown();
@@ -302,6 +309,7 @@ public class Manager {
                     return;
                 }
                 System.err.println("RequestVote failed (removing dead peer): " + e.getMessage());
+                servers.get(i).shutdown();
                 servers.remove(i);
                 capacities.remove(i);
                 totalNodes = servers.size();
@@ -439,6 +447,7 @@ public class Manager {
         }
 
         for (int id : toRemove) {
+            servers.get(id).shutdown();
             servers.remove(id);
             capacities.remove(id);
         }
