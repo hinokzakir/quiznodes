@@ -24,7 +24,7 @@ public class ServerToServerHandler extends serverToServerCommunicationGrpc.serve
             );
             questions.add(question);
         }
-        manager.addQuiz(request.getId(), new Quiz(request.getId(),questions));
+        manager.addQuiz(request.getId(), new Quiz(request.getId(), request.getName(), questions));
         long capacity = manager.getServerCapacity();
         responseObserver.onNext(replicateResponse.newBuilder().setAvailableCapacity(capacity).build());
         responseObserver.onCompleted();
@@ -63,7 +63,7 @@ public class ServerToServerHandler extends serverToServerCommunicationGrpc.serve
         Quiz quiz = manager.getQuiz(id);
         System.out.println("Quiz: " + quiz);
 
-        quizMessage.Builder builder = quizMessage.newBuilder().setId(quiz.getId());
+        quizMessage.Builder builder = quizMessage.newBuilder().setId(quiz.getId()).setName(quiz.getName());
 
         List<Question> questions = quiz.getQuestions();
 

@@ -55,7 +55,8 @@ public class ClientNode {
             quizMessage response = blockingStub.withDeadlineAfter(3, TimeUnit.SECONDS).getQuiz(request);
 
             String newId = response.getId();
-            Quiz quiz = new Quiz(newId);
+            String name = response.getName();
+            Quiz quiz = new Quiz(newId, name);
             for (questionMessage q : response.getQuestionsList()) {
                 String qid = q.getId();
                 String correct = q.getCorrectAnswer();
@@ -78,7 +79,7 @@ public class ClientNode {
 
     public String sendQuiz(Quiz quiz) {
         try {
-            quizMessage.Builder request = quizMessage.newBuilder().setId(quiz.getId());
+            quizMessage.Builder request = quizMessage.newBuilder().setId(quiz.getId()).setName(quiz.getName());
             List<Question> questions = quiz.getQuestions();
             for (Question question : questions) {
                 questionMessage.Builder q = questionMessage.newBuilder()
@@ -113,7 +114,7 @@ public class ClientNode {
 
             List<Quiz> quizzes = new ArrayList<>();
             for (quizMessage qMsg : response.getQuizzesList()) {
-                Quiz quiz = new Quiz(qMsg.getId());
+                Quiz quiz = new Quiz(qMsg.getId(), qMsg.getName());
                 for (questionMessage qm : qMsg.getQuestionsList()) {
                     Question question = new Question(qm.getId(), qm.getQuestion(), qm.getCorrectAnswer(),
                             qm.getChoicesList());

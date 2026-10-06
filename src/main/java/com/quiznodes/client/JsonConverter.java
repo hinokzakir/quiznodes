@@ -12,6 +12,7 @@ import java.io.File;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class JsonConverter {
     public JsonConverter(){
@@ -25,7 +26,10 @@ public class JsonConverter {
             
             quizJson = new JSONObject(content);
 
-            Quiz quiz = new Quiz();
+            String id  = UUID.randomUUID().toString();
+            String name = quizJson.getString("name");
+
+            Quiz quiz = new Quiz(id, name);
 
             JSONArray questions = quizJson.getJSONArray("questions");
             for(int i = 0; i < questions.length(); i++ ){

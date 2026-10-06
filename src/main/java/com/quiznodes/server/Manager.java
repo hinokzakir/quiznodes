@@ -383,7 +383,8 @@ public class Manager {
 
     private Quiz buildQuiz (quizMessage response){
         String newId = response.getId();
-        Quiz quiz = new Quiz(newId);
+        String name = response.getName();
+        Quiz quiz = new Quiz(newId, name);
         for (questionMessage q : response.getQuestionsList()) {
             String qid = q.getId();
             String correct = q.getCorrectAnswer();
