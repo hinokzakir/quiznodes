@@ -1,0 +1,35 @@
+{
+  "name": "Java Exam 2026",
+  "questions": [
+    {
+      "text": "What is the index of the first element in a Java array?",
+      "alternatives": [
+        "1",
+        "0",
+        "-1",
+        "2"
+      ],
+      "correct": "0"
+    },
+    {
+      "text": "Which keyword is used by a class to inherit from another class in Java?",
+      "alternatives": [
+        "implements",
+        "inherits",
+        "extends",
+        "super"
+      ],
+      "correct": "extends"
+    },
+    {
+      "text": "Which of these is NOT a primitive data type in Java?",
+      "alternatives": [
+        "int",
+        "boolean",
+        "double",
+        "String"
+      ],
+      "correct": "String"
+    }
+  ]
+}

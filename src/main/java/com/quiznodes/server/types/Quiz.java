@@ -11,6 +11,7 @@ public class Quiz {
 
     public Quiz() {
         this.id = UUID.randomUUID().toString();
+        this.name = id;
         questions = new ArrayList<>();
     }
 
