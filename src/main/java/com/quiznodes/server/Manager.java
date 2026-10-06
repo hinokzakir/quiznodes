@@ -296,12 +296,6 @@ public class Manager {
                     electionHandler.increaseVote();
                     System.out.println("Got vote from " + peer.getPort() 
                     + ", votes: " + electionHandler.getVotes() + " / " + majority);
-
-                    if (electionHandler.getVotes() >= majority) {
-                        setIamLeader();
-                        System.out.println("I am new LEADER!!!!!!!");
-                        return;
-                    }
                 }
             } catch (Exception e) {
                 if (Thread.currentThread().isInterrupted() || this.state != 1) {
@@ -326,6 +320,10 @@ public class Manager {
                     }
                 }
             }
+        }
+        if (electionHandler.getVotes() >= majority) {
+            setIamLeader();
+            System.out.println("I am new LEADER!!!!!!!");
         }
     }
 
@@ -412,9 +410,6 @@ public class Manager {
         for(serverInfo info : newServerList){
             String ip = info.getIp();
             int port = info.getPort();
-            if(ip.equals(server.getIp()) && port == server.getPort()) {
-                continue;
-            }
             String key = ip + ":" + port;
             leaderServerKeys.add(key);
 
