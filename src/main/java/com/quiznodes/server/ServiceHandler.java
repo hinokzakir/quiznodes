@@ -41,6 +41,7 @@ public class ServiceHandler extends serviceHandlerGrpc.serviceHandlerImplBase {
             quiz.setId(q.getId());
             for(Question question : q.getQuestions()){
                 questionMessage questionmessage = questionMessage.newBuilder()
+                    .setQuestion(question.getQuestion())
                     .addAllChoices(question.getChoices())
                     .setCorrectAnswer(question.getCorrectAnswer())
                     .setId(question.getId())
@@ -62,9 +63,10 @@ public class ServiceHandler extends serviceHandlerGrpc.serviceHandlerImplBase {
 
         for (int i = 0; i < count; i++) {
             String qid = request.getQuestions(i).getId();
+            String question = request.getQuestions(i).getQuestion();
             String correct = request.getQuestions(i).getCorrectAnswer();
             List<String> choices = request.getQuestions(i).getChoicesList();
-            Question q = new Question(qid, correct, choices);
+            Question q = new Question(qid, question, correct, choices);
             quiz.addQuestion(q);
         }
         manager.replicateQuiz(quiz);
