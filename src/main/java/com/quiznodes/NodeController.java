@@ -13,12 +13,17 @@ import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.geometry.Insets;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ListView;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 import javafx.stage.Window;
 
 import java.util.concurrent.CompletableFuture;
@@ -72,6 +77,13 @@ public class NodeController {
         leaderInfoMessage response = leaderInfoCommunication.getLeader();
         this.leaderIp = response.getIp();
         this.leaderPort = response.getPort();
+
+        quizListView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue != null) {
+                System.out.println("Selected item: " + newValue.getId());
+                handleListItem(newValue);
+            }
+        });
 
     }
 
@@ -215,6 +227,38 @@ public class NodeController {
                 handleConnectionLost("Connection Lost (Server Offline)");
             }
         });
+    }
+
+    @FXML
+    private void handleListItem(Quiz quiz) {
+        Stage popupStage = new Stage();
+        // block interaction with the main window until this popup is closed
+        popupStage.initModality(Modality.APPLICATION_MODAL); 
+        popupStage.setTitle("Quiz"); // will change to quizname when it is fixed
+
+        VBox contentBox = new VBox(15); // 15 pixels of spacing between items
+        contentBox.setPadding(new Insets(20));
+
+        // add all questions
+        for (int i = 0; i < quiz.getQuestions().size(); i++) {
+            Question question = quiz.getQuestions().get(i);
+            
+            Label questionLabel = new Label((i + 1) + ". " + question.getQuestion());
+            questionLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 14px;");
+            contentBox.getChildren().add(questionLabel);
+            for (String alternative : question.getChoices()) {
+                Label altLabel = new Label("   • " + alternative);
+                contentBox.getChildren().add(altLabel);
+            }
+        }
+
+        ScrollPane scrollPane = new ScrollPane(contentBox);
+        scrollPane.setFitToWidth(true); 
+        scrollPane.setStyle("-fx-background-color: transparent;");
+
+        Scene scene = new Scene(scrollPane, 400, 500); // width: 400, height: 500
+        popupStage.setScene(scene);
+        popupStage.show();
     }
 
     private void startHeartbeat() {
