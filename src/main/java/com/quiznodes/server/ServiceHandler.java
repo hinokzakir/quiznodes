@@ -46,6 +46,7 @@ public class ServiceHandler extends serviceHandlerGrpc.serviceHandlerImplBase {
                 }
             }
         }
+        System.out.println("Nr of quizzes: " + quizSet.size());
         responseObserver.onNext(response.build());
         responseObserver.onCompleted();
     }
