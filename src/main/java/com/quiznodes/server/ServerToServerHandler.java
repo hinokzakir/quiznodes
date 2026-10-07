@@ -123,4 +123,30 @@ public class ServerToServerHandler extends serverToServerCommunicationGrpc.serve
         responseObserver.onNext(builder.build());
         responseObserver.onCompleted();
     }
+
+    @Override
+    public void getAllQuizzes(Empty request, StreamObserver<quizList> responseObserver) {
+        List<Quiz> quizzes = manager.getAllQuizList();
+
+        quizList.Builder response = quizList.newBuilder();
+
+        for(Quiz q : quizzes) {
+            quizMessage.Builder quiz = quizMessage.newBuilder();
+            quiz.setId(q.getId());
+            quiz.setName(q.getName());
+            for(Question question : q.getQuestions()){
+                questionMessage questionmessage = questionMessage.newBuilder()
+                        .setQuestion(question.getQuestion())
+                        .addAllChoices(question.getChoices())
+                        .setCorrectAnswer(question.getCorrectAnswer())
+                        .setId(question.getId())
+                        .build();
+
+                quiz.addQuestions(questionmessage);
+            }
+            response.addQuizzes(quiz.build());
+        }
+        responseObserver.onNext(response.build());
+        responseObserver.onCompleted();
+    }
 }

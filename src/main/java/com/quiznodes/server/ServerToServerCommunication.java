@@ -103,6 +103,10 @@ public class ServerToServerCommunication {
         return response;     
     }
 
+    public quizList getAllQuizzes(){
+        return stub.getAllQuizzes(Empty.newBuilder().build());
+    }
+
     public void shutdown(){
         if (channel != null && !channel.isShutdown()) {
             channel.shutdown();

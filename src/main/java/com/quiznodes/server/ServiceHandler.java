@@ -1,7 +1,9 @@
 package com.quiznodes.server;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import com.quiznodes.proto.*;
 import com.quiznodes.server.types.*;
@@ -32,25 +34,17 @@ public class ServiceHandler extends serviceHandlerGrpc.serviceHandlerImplBase {
 
     @Override 
     public void getAllQuiz(Empty request, StreamObserver<quizList> responseObserver) {
-        List<Quiz> quizzes = manager.getAllQuizList();
-
+        List<quizList> quizLists = manager.getAllQuizzesFromAllServers();
+        Set<String> quizSet = new HashSet<>();
         quizList.Builder response = quizList.newBuilder();
 
-        for(Quiz q : quizzes) {
-            quizMessage.Builder quiz = quizMessage.newBuilder();
-            quiz.setId(q.getId());
-            quiz.setName(q.getName());
-            for(Question question : q.getQuestions()){
-                questionMessage questionmessage = questionMessage.newBuilder()
-                    .setQuestion(question.getQuestion())
-                    .addAllChoices(question.getChoices())
-                    .setCorrectAnswer(question.getCorrectAnswer())
-                    .setId(question.getId())
-                    .build();
-                
-                quiz.addQuestions(questionmessage);
-            }   
-            response.addQuizzes(quiz.build());
+        for(quizList qList : quizLists) {
+            for(quizMessage message: qList.getQuizzesList()){
+                if (!quizSet.contains(message.getId())){
+                    quizSet.add(message.getId());
+                    response.addQuizzes(message);
+                }
+            }
         }
         responseObserver.onNext(response.build());
         responseObserver.onCompleted();

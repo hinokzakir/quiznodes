@@ -1,10 +1,7 @@
 package com.quiznodes.server;
 
-import com.quiznodes.proto.questionMessage;
+import com.quiznodes.proto.*;
 import com.quiznodes.server.LeaderInfoCommunication;
-import com.quiznodes.proto.quizMessage;
-import com.quiznodes.proto.responseVoteMessage;
-import com.quiznodes.proto.serverInfo;
 import com.quiznodes.server.types.NodeInfo;
 import com.quiznodes.server.types.Question;
 import com.quiznodes.server.types.Quiz;
@@ -458,6 +455,18 @@ public class Manager {
 
     public int getState() {
         return state;
+    }
+
+    public List<quizList> getAllQuizzesFromAllServers(){
+        List<quizList> quizLists = new ArrayList<>();
+        for (ServerToServerCommunication peer : servers.values()) {
+            try {
+                quizLists.add(peer.getAllQuizzes());
+            } catch (Exception e) {
+                System.out.println("Skipping getting quizzes from: " + peer.getHost() + ":" + peer.getPort());
+            }
+        }
+        return quizLists;
     }
 
     public static void main(String[] args) throws Exception {

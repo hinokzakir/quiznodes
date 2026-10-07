@@ -11,6 +11,7 @@ service serverToServerCommunication {
   rpc sendLeaderHeartbeat(Empty) returns (heartbeatResponse);
   rpc sendLeaderHeartbeatFirst(heartbeatRequest) returns (heartbeatResponse);
   rpc getQuiz (quizId) returns (quizMessage);
+  rpc getAllQuizzes(Empty) returns (quizList);
   rpc joinNetwork (joinMessage) returns (Empty);
   rpc requestVote (requestVoteMessage) returns (responseVoteMessage);
 }
@@ -45,3 +46,4 @@ message serverInfo {
   string ip = 1;
   int32 port = 2;
 }
+
