@@ -291,6 +291,14 @@ public class Manager {
                 System.out.println("Sending RequestVote...");
                 responseVoteMessage response = peer.requestVote(server.getIp(), server.getPort(), newTerm);
                 System.out.println("Vote result: " + response.getVoteGranted() + " (term: " + response.getTerm() + ")");
+                if(response.getIAmLeader()){
+                    setState(2);
+                    electionHandler.setTerm(response.getTerm());
+                    electionHandler.setHasVoted(false);
+                    System.out.println("FAHHHHHHH");
+                    server.start();
+                    return;
+                }
                 // cancel election if current term is too low
                 if (response.getTerm() > electionHandler.getTerm()) {
                     setState(2);
@@ -467,6 +475,10 @@ public class Manager {
             }
         }
         return quizLists;
+    }
+
+    boolean amILeader(){
+        return state == 0;
     }
 
     public static void main(String[] args) throws Exception {

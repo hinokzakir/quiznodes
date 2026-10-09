@@ -12,6 +12,7 @@ public class ServerToServerHandler extends serverToServerCommunicationGrpc.serve
     public ServerToServerHandler(Manager manager) {
         this.manager = manager;
     }
+    private boolean testBool = false;
 
     @Override
     public void replicateQuiz(quizMessage request, StreamObserver<replicateResponse> responseObserver) {
@@ -35,6 +36,16 @@ public class ServerToServerHandler extends serverToServerCommunicationGrpc.serve
         long capacity = manager.getServerCapacity();
         manager.resetElectionTimeout();
         System.out.println("Received Heartbeat");
+        if (!testBool) {
+            testBool = true;
+            try {
+                Thread.sleep(50000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        System.out.println("hej");
         responseObserver.onNext(heartbeatResponse.newBuilder().setAvailableCapacity(capacity).build());
         responseObserver.onCompleted();
     }
@@ -99,27 +110,34 @@ public class ServerToServerHandler extends serverToServerCommunicationGrpc.serve
         
         // first we need to check if we already have voted
 
-        if(request.getTerm() > manager.electionHandler.getTerm()) {
-            manager.setState(2); // set server to candidate since we are 1 term behind
-            manager.electionHandler.setTerm(request.getTerm());
-            manager.electionHandler.setHasVoted(false);
+        if(manager.getState() != 0) {
+            if (request.getTerm() > manager.electionHandler.getTerm()) {
+                manager.setState(2); // set server to candidate since we are 1 term behind
+                manager.electionHandler.setTerm(request.getTerm());
+                manager.electionHandler.setHasVoted(false);
+            }
+
+            long localTerm = manager.electionHandler.getTerm();
+            boolean hasVoted = manager.electionHandler.getHasVoted();
+
+            boolean voteGranted = ((request.getTerm() >= localTerm) && !hasVoted);
+
+            if (voteGranted) {
+                manager.electionHandler.setHasVoted(voteGranted);
+                manager.resetElectionTimeout();
+            }
+            System.out.println("Vote requested by " + request.getPort() + " for term "
+                    + request.getTerm() + ", granted: " + voteGranted);
+
+            builder.setVoteGranted(voteGranted);
+
+            builder.setTerm(manager.electionHandler.getTerm());
+            builder.setIAmLeader(false);
+        } else {
+            builder.setIAmLeader(true);
+            builder.setTerm(manager.electionHandler.getTerm());
+            builder.setVoteGranted(false);
         }
-
-        long localTerm = manager.electionHandler.getTerm();
-        boolean hasVoted = manager.electionHandler.getHasVoted();
-
-        boolean voteGranted = ((request.getTerm() >= localTerm) && !hasVoted);
-
-        if(voteGranted) {
-            manager.electionHandler.setHasVoted(voteGranted);
-            manager.resetElectionTimeout();
-        }
-        System.out.println("Vote requested by " + request.getPort() + " for term " 
-            + request.getTerm() + ", granted: " + voteGranted);
-        
-        builder.setVoteGranted(voteGranted);
-
-        builder.setTerm(manager.electionHandler.getTerm());
         responseObserver.onNext(builder.build());
         responseObserver.onCompleted();
     }

@@ -13,6 +13,7 @@ public class ServerNode {
     private NameServiceHandler nameServiceHandler;
     private NameService nameService;
     private Manager manager;
+    private boolean started = false;
 
     public ServerNode(int port, Manager manager) {
         this.ip = "localhost";
@@ -27,10 +28,14 @@ public class ServerNode {
     }
 
     public void start() throws Exception {
-        server.start();
+        if (!started) {
+            server.start();
+            started = true;
+        }
         this.port = server.getPort();
         this.name = ip + ":" + port;
         this.nameService = nameServiceHandler.connectNamingService();
+        System.out.println("FAAAAAAAA2");
         if (nameService != null) {
             if (nameServiceHandler.nameServiceAvailable) {
                 try {
@@ -78,6 +83,7 @@ public class ServerNode {
     public int getPort() {
         return this.port;
     }
+
 
     /*
      * public static void main(String[] args) throws Exception {

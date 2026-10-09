@@ -32,7 +32,9 @@ public class NameServiceHandler {
     }
 
     public void syncAndConnectNodes(String name) throws Exception {
+        discoveredNodes.clear();
         Map<String, Map<String, Integer>> nodes = nameService.resolveGroup();
+        System.out.println("FAAAAAAAAAAH3");
         if (nodes.size() == 1) {
             System.out.println("I am alone. I am leader");
             manager.setIamLeader();
@@ -49,6 +51,7 @@ public class NameServiceHandler {
                 String nodeIp = nodeEntry.getKey();
                 int nodePort = nodeEntry.getValue();
                 String nodeId = nodeName + "@" + nodeIp + ":" + nodePort;
+                System.out.println("FAAAAAAAAAAH4");
 
                 if (!discoveredNodes.add(nodeId)) {
                     continue;
@@ -67,6 +70,7 @@ public class NameServiceHandler {
                 // "FAILED"));
             }
         }
+        System.out.println("FAAAAAAAAAAH5");
     }
 
     public void registerNode(String name, String ip, int port) {
