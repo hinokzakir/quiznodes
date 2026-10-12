@@ -44,8 +44,6 @@ public class ServerToServerHandler extends serverToServerCommunicationGrpc.serve
                 throw new RuntimeException(e);
             }
         }
-
-        System.out.println("hej");
         responseObserver.onNext(heartbeatResponse.newBuilder().setAvailableCapacity(capacity).build());
         responseObserver.onCompleted();
     }

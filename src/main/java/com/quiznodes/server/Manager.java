@@ -295,7 +295,7 @@ public class Manager {
                     setState(2);
                     electionHandler.setTerm(response.getTerm());
                     electionHandler.setHasVoted(false);
-                    System.out.println("FAHHHHHHH");
+                    System.out.println("Leader already exists, abandoning election");
                     server.start();
                     return;
                 }

@@ -35,7 +35,6 @@ public class ServerNode {
         this.port = server.getPort();
         this.name = ip + ":" + port;
         this.nameService = nameServiceHandler.connectNamingService();
-        System.out.println("FAAAAAAAA2");
         if (nameService != null) {
             if (nameServiceHandler.nameServiceAvailable) {
                 try {
