@@ -96,12 +96,27 @@
                     <pluginArtifact>io.grpc:protoc-gen-grpc-java:${grpc.version}:exe:${os.detected.classifier}</pluginArtifact>
                 </configuration>
                 <executions>
+                    <!-- First execution for standard Protocol Buffers -->
                     <execution>
+                        <id>compile-protobuf</id>
                         <goals>
                             <goal>compile</goal>
+                        </goals>
+                        <phase>generate-sources</phase>
+                        <configuration>
+                            <temporaryProtoFileDirectory>${project.build.directory}/protoc-dependencies-java</temporaryProtoFileDirectory>
+                        </configuration>
+                    </execution>
+                    <!-- Second execution for gRPC Stubs -->
+                    <execution>
+                        <id>compile-grpc</id>
+                        <goals>
                             <goal>compile-custom</goal>
                         </goals>
                         <phase>generate-sources</phase>
+                        <configuration>
+                            <temporaryProtoFileDirectory>${project.build.directory}/protoc-dependencies-grpc</temporaryProtoFileDirectory>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
@@ -146,6 +161,42 @@
                 <configuration>
                     <mainClass>${exec.mainClass}</mainClass>
                 </configuration>
+            </plugin>
+            <!-- Maven Shade Plugin for Fat JAR -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.5.2</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <createDependencyReducedPom>false</createDependencyReducedPom>
+                            <transformers>
+                                <!-- CRITICAL FOR gRPC: Merges META-INF/services/ files -->
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                                <!-- Sets the default class to run -->
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>com.quiznodes.info.LeaderInfoServer</mainClass>
+                                </transformer>
+                            </transformers>
+                            <!-- Removes signatures from dependencies so the fat jar doesn't fail security checks -->
+                            <filters>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
