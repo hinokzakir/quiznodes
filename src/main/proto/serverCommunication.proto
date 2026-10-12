@@ -18,6 +18,7 @@ service serverToServerCommunication {
 
 message heartbeatResponse{
   int64 availableCapacity = 1;
+  repeated string quizIds = 2;
 }
 message replicateResponse{
   int64 availableCapacity = 1;

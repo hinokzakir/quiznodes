@@ -7,6 +7,7 @@ import com.quiznodes.server.types.Quiz;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 
 public class ServerBackend {
     private HashMap<String, Quiz> quizzes;
@@ -33,7 +34,11 @@ public class ServerBackend {
 
     public List<Quiz> getAllQuizList() {
         return new ArrayList<>(quizzes.values());
-    } 
+    }
+
+    public Set<String> getQuizIds(){
+        return quizzes.keySet();
+    }
 
     public void deleteQuiz(String name) {
         quizzes.remove(name);

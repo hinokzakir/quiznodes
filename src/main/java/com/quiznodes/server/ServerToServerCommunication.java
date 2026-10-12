@@ -12,6 +12,7 @@ import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 public class ServerToServerCommunication {
@@ -19,12 +20,14 @@ public class ServerToServerCommunication {
     private String host;
     private int port;
     ManagedChannel channel;
+    Manager manager;
 
-    public ServerToServerCommunication(String host, int port) {
+    public ServerToServerCommunication(String host, int port, Manager manager) {
         channel = ManagedChannelBuilder.forAddress(host, port).usePlaintext().build();
         stub = serverToServerCommunicationGrpc.newBlockingStub(channel);
         this.host = host;
         this.port = port;
+        this.manager = manager;
     }
 
     public long replicateQuiz(Quiz quiz) {
@@ -56,13 +59,15 @@ public class ServerToServerCommunication {
         }
     }
 
-    public long sendLeaderHeartbeatFirst(List <serverInfo> servers) {
+    public long sendLeaderHeartbeatFirst(List <serverInfo> servers, int serverId) {
         heartbeatRequest.Builder request = heartbeatRequest.newBuilder();
         for(int i = 0; i < servers.size(); i++) {
             request.addServers(servers.get(i));
         }
         heartbeatResponse response = stub.sendLeaderHeartbeatFirst(request.build());
         System.out.println("Got Capacity:" + response.getAvailableCapacity());
+        List<String> quizIds = response.getQuizIdsList();
+        manager.updateQuizToServerMap(quizIds, serverId);
         return response.getAvailableCapacity();
     }
 

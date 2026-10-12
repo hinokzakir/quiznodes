@@ -48,7 +48,7 @@ public class Manager {
 
     public void addServer(String host, int port) {
         int id = nextServerId.getAndIncrement();
-        servers.put(id,new ServerToServerCommunication(host, port));
+        servers.put(id,new ServerToServerCommunication(host, port, this));
         capacities.put(id, 0L);
         System.out.println("Server added" + host + ":" + port);
     }
@@ -193,7 +193,7 @@ public class Manager {
         }
         for (int i: servers.keySet()) {
             ServerToServerCommunication serverToServerCommunication = servers.get(i);
-            long capacity = serverToServerCommunication.sendLeaderHeartbeatFirst(serverInfoList);
+            long capacity = serverToServerCommunication.sendLeaderHeartbeatFirst(serverInfoList, i);
             capacities.put(i, capacity);
             total_capacity += capacity;
         }
@@ -477,8 +477,21 @@ public class Manager {
         return quizLists;
     }
 
-    boolean amILeader(){
+    public boolean amILeader(){
         return state == 0;
+    }
+
+    public Set<String> getQuizIds(){
+        return serverBackend.getQuizIds();
+    }
+
+    public void updateQuizToServerMap(List<String> quizIds, int serverId){
+        for(String quizId : quizIds){
+            if(!quizToServersMap.containsKey(quizId)){
+                quizToServersMap.put(quizId, new ArrayList<>());
+            }
+            quizToServersMap.get(quizId).add(serverId);
+        }
     }
 
     public static void main(String[] args) throws Exception {

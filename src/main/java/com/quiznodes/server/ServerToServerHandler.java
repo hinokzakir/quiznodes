@@ -6,6 +6,7 @@ import io.grpc.stub.StreamObserver;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public class ServerToServerHandler extends serverToServerCommunicationGrpc.serverToServerCommunicationImplBase {
     private Manager manager;
@@ -36,14 +37,14 @@ public class ServerToServerHandler extends serverToServerCommunicationGrpc.serve
         long capacity = manager.getServerCapacity();
         manager.resetElectionTimeout();
         System.out.println("Received Heartbeat");
-        if (!testBool) {
+        /*if (!testBool) {
             testBool = true;
             try {
                 Thread.sleep(50000);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
-        }
+        }*/
         responseObserver.onNext(heartbeatResponse.newBuilder().setAvailableCapacity(capacity).build());
         responseObserver.onCompleted();
     }
@@ -61,7 +62,8 @@ public class ServerToServerHandler extends serverToServerCommunicationGrpc.serve
             manager.updateServerList(leaderServers);
         }
 
-        responseObserver.onNext(heartbeatResponse.newBuilder().setAvailableCapacity(capacity).build());
+        Set<String> quizIdSet = manager.getQuizIds();
+        responseObserver.onNext(heartbeatResponse.newBuilder().setAvailableCapacity(capacity).addAllQuizIds(quizIdSet).build());
         responseObserver.onCompleted();
     }
 
