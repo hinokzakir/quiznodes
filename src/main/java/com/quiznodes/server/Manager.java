@@ -179,6 +179,26 @@ public class Manager {
                 throw new RuntimeException(e);
             }
         }
+
+        /*int replicationFactor;
+        int nrServers = servers.size() - fullServers.size();
+        if (nrServers == 1) {
+            replicationFactor = 1;
+        } else if (nrServers < 4) {
+            replicationFactor = 2;
+        } else {
+            replicationFactor = 3;
+        }
+
+        for (String id: quizToServersMap.keySet()) {
+            int size = quizToServersMap.get(id).size();
+            if(size < replicationFactor){
+                int difference = replicationFactor - size;
+                for(int i = 0; i < difference; i++){
+                    re
+                }
+            }
+        }*/
     }
 
     public void sendLeaderHeartbeatFirst() {

@@ -22,6 +22,7 @@ public class ServerNode {
         this.server = ServerBuilder.forPort(port)
                 .addService(new ServiceHandler(manager))
                 .addService(new ServerToServerHandler(manager))
+                .addService(new DebugHandler(manager))
                 .build();
         this.nameServiceHandler = new NameServiceHandler(manager);
         this.manager = manager;
