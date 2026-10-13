@@ -6,6 +6,8 @@ import com.quiznodes.server.Manager;
 import com.quiznodes.server.types.*;
 
 import com.quiznodes.client.ClientNode;
+import com.quiznodes.client.QuizController;
+import javafx.fxml.FXMLLoader;
 import com.quiznodes.client.JsonConverter;
 import com.quiznodes.server.ServerNode;
 import io.grpc.StatusRuntimeException;
@@ -231,34 +233,21 @@ public class NodeController {
 
     @FXML
     private void handleListItem(Quiz quiz) {
-        Stage popupStage = new Stage();
-        // block interaction with the main window until this popup is closed
-        popupStage.initModality(Modality.APPLICATION_MODAL); 
-        popupStage.setTitle("Quiz"); // will change to quizname when it is fixed
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/quiz.fxml"));
+            Scene scene = new Scene(loader.load());
 
-        VBox contentBox = new VBox(15); // 15 pixels of spacing between items
-        contentBox.setPadding(new Insets(20));
+            QuizController controller = loader.getController();
+            controller.setQuiz(quiz);
 
-        // add all questions
-        for (int i = 0; i < quiz.getQuestions().size(); i++) {
-            Question question = quiz.getQuestions().get(i);
-            
-            Label questionLabel = new Label((i + 1) + ". " + question.getQuestion());
-            questionLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 14px;");
-            contentBox.getChildren().add(questionLabel);
-            for (String alternative : question.getChoices()) {
-                Label altLabel = new Label("   • " + alternative);
-                contentBox.getChildren().add(altLabel);
-            }
+            Stage popupStage = new Stage();
+            popupStage.initModality(Modality.APPLICATION_MODAL);
+            popupStage.setTitle(quiz.getName());
+            popupStage.setScene(scene);
+            popupStage.show();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-
-        ScrollPane scrollPane = new ScrollPane(contentBox);
-        scrollPane.setFitToWidth(true); 
-        scrollPane.setStyle("-fx-background-color: transparent;");
-
-        Scene scene = new Scene(scrollPane, 400, 500); // width: 400, height: 500
-        popupStage.setScene(scene);
-        popupStage.show();
     }
 
     private void startHeartbeat() {
