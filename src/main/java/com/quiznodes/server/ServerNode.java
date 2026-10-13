@@ -41,6 +41,7 @@ public class ServerNode {
                 try {
                     nameService.registerNode(name, ip, port);
                     manager.addServer(ip, port);
+                    manager.sendToDebugger(ip, port);
                     System.out.println(
                             "Registered with Name Service: [Name]: " + name + ", [IP]: " + ip + ", [Port]: " + port);
 

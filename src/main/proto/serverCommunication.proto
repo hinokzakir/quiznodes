@@ -14,7 +14,6 @@ service serverToServerCommunication {
   rpc getAllQuizzes(Empty) returns (quizList);
   rpc joinNetwork (joinMessage) returns (Empty);
   rpc requestVote (requestVoteMessage) returns (responseVoteMessage);
-  rpc sleep (Empty) returns (Empty);
 }
 
 message heartbeatResponse{

@@ -8,5 +8,6 @@ public class DebugController {
 
     public void addServer(String ip, int port){
         servers.put(ip + ":" + port,new DebugCommunication(ip,port));
+        System.out.println("addServer ip:"+ip+":"+port);
     }
 }

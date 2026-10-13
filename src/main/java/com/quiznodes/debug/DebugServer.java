@@ -1,8 +1,5 @@
 package com.quiznodes.debug;
 
-import com.quiznodes.NodeController;
-import com.quiznodes.info.LeaderInfoHandler;
-import com.quiznodes.info.LeaderInfoServer;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 
@@ -23,6 +20,6 @@ public class DebugServer {
     }
 
     public static void main(String[] args) throws IOException, InterruptedException {
-        LeaderInfoServer leaderInfoServer = new LeaderInfoServer("localhost", 1112);
+        DebugServer debugServer =  new DebugServer("localhost", 1112, new DebugController());
     }
 }

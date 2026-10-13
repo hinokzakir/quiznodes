@@ -1,5 +1,7 @@
 package com.quiznodes.server;
 
+import com.quiznodes.server.DebugCommunication;
+import com.quiznodes.debug.DebugController;
 import com.quiznodes.proto.*;
 import com.quiznodes.server.LeaderInfoCommunication;
 import com.quiznodes.server.types.NodeInfo;
@@ -31,11 +33,13 @@ public class Manager {
     private ScheduledFuture<?> electionTimeoutTask;
     private static AtomicInteger nextServerId = new AtomicInteger(0);
     boolean startUpFlag = false;
+    private DebugCommunication debugCommunication;
 
     public Manager(int port, int max_capacity, boolean isLeader) throws Exception {
         serverBackend = new ServerBackend(max_capacity);
         server = new ServerNode(port, this);
         leaderInfoCommunication = new LeaderInfoCommunication("localhost", 1337);
+        debugCommunication = new DebugCommunication("localhost", 1112);
         this.electionHandler = new ElectionHandler(0);
         if (!isLeader) {
             this.state = 2;
@@ -512,6 +516,10 @@ public class Manager {
             }
             quizToServersMap.get(quizId).add(serverId);
         }
+    }
+
+    public void sendToDebugger(String ip, int port){
+        debugCommunication.sendToDebugger(ip, port);
     }
 
     public static void main(String[] args) throws Exception {
