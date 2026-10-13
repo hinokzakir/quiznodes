@@ -12,6 +12,7 @@ import io.grpc.StatusRuntimeException;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.ListView;
+import javafx.scene.control.Button;
 
 public class DebugController {
     private Map<String, DebugCommunication> servers = new HashMap<>();
@@ -19,6 +20,12 @@ public class DebugController {
     private String leader;
     private DebugServer server;
     private ScheduledExecutorService heartbeatScheduler = Executors.newSingleThreadScheduledExecutor();
+
+    @FXML
+    private Button shutdownButton;
+
+    @FXML
+    private Button spawnButton;
 
     @FXML
     private ListView<String> serverListView;
@@ -38,7 +45,11 @@ public class DebugController {
     }
 
     @FXML
-    private void handleConnect() {
+    private void handleSpawn() {
+    }
+
+    @FXML
+    private void handleShutdown() {
     }
 
     public void addServer(String ip, int port) {
@@ -50,7 +61,8 @@ public class DebugController {
             try {
                 debugHeartbeatResponse response = servers.get(id).sendHeartbeat();
                 capacities.put(id, response.getCapacity());
-                if (response.getLeader()) leader = id;
+                if (response.getLeader())
+                    leader = id;
                 Platform.runLater(this::refreshList);
             } catch (Exception e) {
                 e.printStackTrace();
