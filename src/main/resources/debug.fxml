@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox alignment="TOP_CENTER" prefHeight="480.0" prefWidth="400.0" spacing="20.0" styleClass="root-pane" stylesheets="@style.css" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.quiznodes.debug.DebugController">
+
+    <padding>
+        <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
+    </padding>
+
+    <children>
+        <!-- Title -->
+        <Label styleClass="main-title" text="QuizNodes - Debug" />
+
+        <Label styleClass="card-title" text="Available Servers" />
+
+        <ListView fx:id="serverListView" styleClass="dark-list-view" VBox.vgrow="ALWAYS" />
+    </children>
+</VBox>
