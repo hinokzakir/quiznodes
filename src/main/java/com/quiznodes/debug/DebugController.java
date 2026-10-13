@@ -9,15 +9,12 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import com.quiznodes.server.types.*;
-
+import javafx.application.Platform;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 
 public class DebugController {
-    private Map<String, DebugCommunication>  servers = new HashMap<>();
+    private Map<String, DebugCommunication> servers = new HashMap<>();
     private Map<String, Long> capacities = new HashMap<>();
     private String leader;
     private DebugServer server;
@@ -26,14 +23,17 @@ public class DebugController {
     @FXML
     private ListView<String> serverListView;
 
-
     @FXML
     private void initialize() {
-        try {
-            server = new DebugServer("localhost", 0, this);
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace(); // or log it, or show in UI
-        }
+        Thread serverThread = new Thread(() -> {
+            try {
+                server = new DebugServer("localhost", 1112, this);
+            } catch (IOException | InterruptedException e) {
+                e.printStackTrace();
+            }
+        });
+        serverThread.setDaemon(true);
+        serverThread.start();
     }
 
     @FXML
@@ -41,9 +41,22 @@ public class DebugController {
     }
 
     public void addServer(String ip, int port) {
-        servers.put(ip + ":" + port, new DebugCommunication(ip, port));
-        serverListView.getItems().add(ip + ":" + port);
-        System.out.println("addServer ip:"+ip+":"+port);
+        String id = ip + ":" + port;
+        servers.put(id, new DebugCommunication(ip, port));
+        System.out.println("addServer ip:" + id);
+        Platform.runLater(() -> serverListView.getItems().add(formatEntry(id, null)));
+        Thread hbThread = new Thread(() -> {
+            try {
+                debugHeartbeatResponse response = servers.get(id).sendHeartbeat();
+                capacities.put(id, response.getCapacity());
+                if (response.getLeader()) leader = id;
+                Platform.runLater(this::refreshList);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+        hbThread.setDaemon(true);
+        hbThread.start();
     }
     public void startLeaderHeartbeat() {
         heartbeatScheduler = Executors.newSingleThreadScheduledExecutor(r -> {
@@ -58,16 +71,29 @@ public class DebugController {
                 TimeUnit.SECONDS);
     }
 
-    public void sendHeartbeat(){
-        for (String id : servers.keySet()){
-            DebugCommunication server =  servers.get(id);
+    public void sendHeartbeat() {
+        for (String id : servers.keySet()) {
+            DebugCommunication server = servers.get(id);
             debugHeartbeatResponse response = server.sendHeartbeat();
             capacities.put(id, response.getCapacity());
-            if(response.getLeader()){
+            if (response.getLeader()) {
                 leader = id;
             }
             System.out.println(id + " Capacity: " + response.getCapacity());
             System.out.println(id + " Leader: " + response.getLeader());
         }
+        Platform.runLater(this::refreshList);
+    }
+
+    private void refreshList() {
+        serverListView.getItems().clear();
+        for (String id : servers.keySet()) {
+            serverListView.getItems().add(formatEntry(id, capacities.get(id)));
+        }
+    }
+
+    private String formatEntry(String id, Long capacity) {
+        String capStr = capacity == null ? "..." : String.valueOf(capacity);
+        return id + " | capacity: " + capStr;
     }
 }
