@@ -5,6 +5,9 @@ import com.quiznodes.proto.debugHeartbeatResponse;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import com.quiznodes.server.types.*;
 
@@ -18,6 +21,7 @@ public class DebugController {
     private Map<String, Long> capacities = new HashMap<>();
     private String leader;
     private DebugServer server;
+    private ScheduledExecutorService heartbeatScheduler = Executors.newSingleThreadScheduledExecutor();
 
     @FXML
     private ListView<String> serverListView;
@@ -41,6 +45,18 @@ public class DebugController {
         serverListView.getItems().add(ip + ":" + port);
         System.out.println("addServer ip:"+ip+":"+port);
     }
+    public void startLeaderHeartbeat() {
+        heartbeatScheduler = Executors.newSingleThreadScheduledExecutor(r -> {
+            Thread t = new Thread(r, "client-heartbeat-thread");
+            t.setDaemon(true);
+            return t;
+        });
+        heartbeatScheduler.scheduleAtFixedRate(
+                this::sendHeartbeat,
+                0,
+                5,
+                TimeUnit.SECONDS);
+    }
 
     public void sendHeartbeat(){
         for (String id : servers.keySet()){
@@ -50,6 +66,8 @@ public class DebugController {
             if(response.getLeader()){
                 leader = id;
             }
+            System.out.println(id + " Capacity: " + response.getCapacity());
+            System.out.println(id + " Leader: " + response.getLeader());
         }
     }
 }
