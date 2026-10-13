@@ -18,4 +18,8 @@ public class DebugCommunication {
     public void killServer() {
         blockingStub.kill(Empty.newBuilder().build());
     }
+
+    public debugHeartbeatResponse sendHeartbeat(){
+        return blockingStub.heartbeat(Empty.newBuilder().build());
+    }
 }
