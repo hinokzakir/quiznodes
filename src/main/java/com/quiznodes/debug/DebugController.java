@@ -5,6 +5,7 @@ import com.quiznodes.proto.debugHeartbeatResponse;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -32,6 +33,7 @@ public class DebugController {
                 e.printStackTrace();
             }
         });
+        startLeaderHeartbeat();
         serverThread.setDaemon(true);
         serverThread.start();
     }
@@ -44,7 +46,7 @@ public class DebugController {
         String id = ip + ":" + port;
         servers.put(id, new DebugCommunication(ip, port));
         System.out.println("addServer ip:" + id);
-        Platform.runLater(() -> serverListView.getItems().add(formatEntry(id, null)));
+        Platform.runLater(() -> serverListView.getItems().add(formatEntry(id, null, false)));
         Thread hbThread = new Thread(() -> {
             try {
                 debugHeartbeatResponse response = servers.get(id).sendHeartbeat();
@@ -88,12 +90,12 @@ public class DebugController {
     private void refreshList() {
         serverListView.getItems().clear();
         for (String id : servers.keySet()) {
-            serverListView.getItems().add(formatEntry(id, capacities.get(id)));
+            serverListView.getItems().add(formatEntry(id, capacities.get(id), Objects.equals(id, leader)));
         }
     }
 
-    private String formatEntry(String id, Long capacity) {
+    private String formatEntry(String id, Long capacity, boolean leader) {
         String capStr = capacity == null ? "..." : String.valueOf(capacity);
-        return id + " | capacity: " + capStr;
+        return id + " | capacity: " + capStr + " | leader: " + leader;
     }
 }
