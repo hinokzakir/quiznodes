@@ -3,6 +3,9 @@ package com.quiznodes.debug;
 import com.quiznodes.proto.*;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import io.grpc.StatusRuntimeException;
+
+import java.util.concurrent.TimeUnit;
 
 public class DebugCommunication {
     private final ManagedChannel channel;
@@ -20,6 +23,10 @@ public class DebugCommunication {
     }
 
     public debugHeartbeatResponse sendHeartbeat(){
-        return blockingStub.heartbeat(Empty.newBuilder().build());
+        try {
+            return blockingStub.withDeadlineAfter(3, TimeUnit.SECONDS).heartbeat(Empty.newBuilder().build());
+        } catch (StatusRuntimeException e) {
+            throw e;
+        }
     }
 }
