@@ -3,13 +3,12 @@ package com.quiznodes.debug;
 import com.quiznodes.proto.debugHeartbeatResponse;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import io.grpc.StatusRuntimeException;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.ListView;
@@ -74,15 +73,25 @@ public class DebugController {
     }
 
     public void sendHeartbeat() {
+        List<String> toRemove =  new ArrayList<>();
         for (String id : servers.keySet()) {
-            DebugCommunication server = servers.get(id);
-            debugHeartbeatResponse response = server.sendHeartbeat();
-            capacities.put(id, response.getCapacity());
-            if (response.getLeader()) {
-                leader = id;
+            try {
+                DebugCommunication server = servers.get(id);
+                debugHeartbeatResponse response = server.sendHeartbeat();
+                capacities.put(id, response.getCapacity());
+                if (response.getLeader()) {
+                    leader = id;
+                }
+                System.out.println(id + " Capacity: " + response.getCapacity());
+                System.out.println(id + " Leader: " + response.getLeader());
+            } catch (StatusRuntimeException e) {
+                System.out.println(id + " Error: " + e.getStatus());
+                toRemove.add(id);
             }
-            System.out.println(id + " Capacity: " + response.getCapacity());
-            System.out.println(id + " Leader: " + response.getLeader());
+        }
+        for (String id : toRemove) {
+            servers.remove(id);
+            capacities.remove(id);
         }
         Platform.runLater(this::refreshList);
     }
