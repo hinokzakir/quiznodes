@@ -46,6 +46,10 @@ public class DebugController {
 
     @FXML
     private void handleSpawn() {
+        DebugCommunication leaderServer = servers.get(leader);
+        if (leaderServer != null) {
+            leaderServer.spawnServer();
+        }
     }
 
     @FXML

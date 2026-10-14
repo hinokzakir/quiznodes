@@ -29,4 +29,8 @@ public class DebugCommunication {
             throw e;
         }
     }
+
+    public void spawnServer(){
+        blockingStub.spawnServer(Empty.newBuilder().build());
+    }
 }

@@ -12,6 +12,7 @@ service debugCommunication {
   rpc kill (Empty) returns (Empty);
   rpc addNewServer (joinMessage) returns (Empty);
   rpc heartbeat (Empty) returns (debugHeartbeatResponse);
+  rpc spawnServer (Empty) returns (Empty);
 }
 message debugHeartbeatResponse {
   int64 capacity = 1;
