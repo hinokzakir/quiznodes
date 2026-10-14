@@ -50,6 +50,16 @@ public class DebugController {
 
     @FXML
     private void handleShutdown() {
+        String selected = serverListView.getSelectionModel().getSelectedItem();
+
+        if (selected != null) {
+            String id = selected.split("\\s*\\|")[0];
+            System.out.println("Selected ID: " + id);
+            DebugCommunication server = servers.get(id);
+            System.out.println(server);
+            server.killServer();
+        }
+
     }
 
     public void addServer(String ip, int port) {
@@ -97,7 +107,7 @@ public class DebugController {
                 System.out.println(id + " Capacity: " + response.getCapacity());
                 System.out.println(id + " Leader: " + response.getLeader());
             } catch (StatusRuntimeException e) {
-                System.out.println(id + " Error: " + e.getStatus());
+                System.out.println("Removing: " + id);
                 toRemove.add(id);
             }
         }

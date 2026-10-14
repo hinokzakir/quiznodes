@@ -20,7 +20,7 @@ public class DebugHandler extends debugCommunicationGrpc.debugCommunicationImplB
 
     @Override
     public void kill(Empty request, StreamObserver<Empty> responseObserver) {
-        manager.stopServer();
+        manager.shutdownNode();
         responseObserver.onNext(Empty.newBuilder().build());
         responseObserver.onCompleted();
     }

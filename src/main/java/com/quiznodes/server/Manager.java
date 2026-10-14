@@ -522,6 +522,11 @@ public class Manager {
         debugCommunication.sendToDebugger(ip, port);
     }
 
+    public void shutdownNode(){
+        server.stop();
+        heartbeatScheduler.shutdownNow();
+    }
+
     public static void main(String[] args) throws Exception {
         Manager manager = new Manager(0, 100, false);
         manager.blockUntilShutdown();
