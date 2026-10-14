@@ -51,7 +51,24 @@ public class QuizController {
 
     @FXML
     private void handleSubmit() {
+        if (toggleGroup != null && toggleGroup.getSelectedToggle() != null) {
+            RadioButton selectedRb = (RadioButton) toggleGroup.getSelectedToggle();
+            String selectedAnswer = selectedRb.getText();
+            System.out.println("The user picked: " + selectedAnswer);
 
+            if (quizEngine.isCorrect(selectedAnswer, quiz.getQuestions().get(quizEngine.getProgress() - 1))) {
+                scoreLabel.setText("Score: " + quizEngine.getScore());
+            }
+            submitBtn.setVisible(false);
+            submitBtn.setManaged(false);
+
+            toggleGroup = new ToggleGroup();
+            choicesBox.getChildren().clear();
+
+            feedbackLabel.setText("No more questions");
+            questionLabel.setText("Result: " + quizEngine.getScore() + " / " + quizEngine.getProgress());
+
+        }
     }
 
     @FXML
