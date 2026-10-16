@@ -32,6 +32,7 @@
             <Button fx:id="spawnBtn" mnemonicParsing="false" onAction="#handleSpawn" prefHeight="42.0" prefWidth="124.0" styleClass="primary-button" text="Spawn Server" />
             <Button fx:id="shutdownBtn" mnemonicParsing="false" onAction="#handleShutdown" styleClass="primary-button" text="Shutdown server" />
             <Button fx:id="sleepBtn" mnemonicParsing="false" onAction="#handleSleep" styleClass="primary-button" text="Sleep server" />
+            <Button fx:id="shutdownAllBtn" mnemonicParsing="false" onAction="#handleShutdownAll" styleClass="primary-button" text="Shutdown All Servers" />
         </HBox>
     </children>
 </VBox>

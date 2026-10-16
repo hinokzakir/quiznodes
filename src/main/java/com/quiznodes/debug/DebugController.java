@@ -92,6 +92,13 @@ public class DebugController {
 
     }
 
+    @FXML
+    private void handleShutdownAll(){
+        for (DebugCommunication server : servers.values()) {
+            server.killServer();
+        }
+    }
+
     public void addServer(String ip, int port) {
         String id = ip + ":" + port;
         servers.put(id, new DebugCommunication(ip, port));
