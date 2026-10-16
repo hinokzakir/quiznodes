@@ -10,10 +10,12 @@ import java.util.List;
 import java.util.Set;
 
 public class ServerBackend {
+    private int maxCapacity;
     private HashMap<String, Quiz> quizzes;
     private NodeInfo nodeInfo;
 
     public ServerBackend(int max_capacity) {
+        maxCapacity = max_capacity;
         quizzes = new HashMap<>();
         nodeInfo = new NodeInfo(max_capacity);
     }
@@ -46,5 +48,10 @@ public class ServerBackend {
 
     public long getCapacity() {
         return nodeInfo.getCapacity();
+    }
+
+    public void reset(){
+        nodeInfo = new NodeInfo(maxCapacity);
+        quizzes.clear();
     }
 }

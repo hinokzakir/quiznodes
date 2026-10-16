@@ -16,7 +16,7 @@ public class DebugCommunication {
         this.blockingStub = debugCommunicationGrpc.newBlockingStub(channel);
     }
     public void sleep() {
-        blockingStub.sleep(Empty.newBuilder().build());
+        blockingStub.withDeadlineAfter(3, TimeUnit.SECONDS).sleep(Empty.newBuilder().build());
     }
     public void killServer() {
         blockingStub.kill(Empty.newBuilder().build());

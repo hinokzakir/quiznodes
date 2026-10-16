@@ -34,6 +34,8 @@ public class Manager {
     private static AtomicInteger nextServerId = new AtomicInteger(0);
     boolean startUpFlag = false;
     private DebugCommunication debugCommunication;
+    private boolean sleep = false;
+    private boolean debugShutdown = false;
 
     public Manager(int port, int max_capacity, boolean isLeader) throws Exception {
         serverBackend = new ServerBackend(max_capacity);
@@ -115,10 +117,12 @@ public class Manager {
     }
 
     public void stopServer() {
-        server.stop();
-        for (Process process : serversStarted) {
-            if (process.isAlive()) {
-                process.destroy();
+        if(!debugShutdown) {
+            server.stop();
+            for (Process process : serversStarted) {
+                if (process.isAlive()) {
+                    process.destroy();
+                }
             }
         }
     }
@@ -320,6 +324,7 @@ public class Manager {
                     electionHandler.setTerm(response.getTerm());
                     electionHandler.setHasVoted(false);
                     System.out.println("Leader already exists, abandoning election");
+                    serverBackend.reset();
                     server.start();
                     return;
                 }
@@ -522,9 +527,34 @@ public class Manager {
         debugCommunication.sendToDebugger(ip, port);
     }
 
-    public void shutdownNode(){
+    public void shutdownNode() {
+        System.out.println("Shutting down node " + server.getPort());
+        debugShutdown = true;
+
         server.stop();
         heartbeatScheduler.shutdownNow();
+
+    }
+
+    public boolean getDebugShutdown(){
+        return debugShutdown;
+    }
+
+    public void sleep(){
+        System.out.println("Sleeping");
+        try {
+            Thread.sleep(50000);
+        } catch (InterruptedException e) {
+            System.err.println("Problem with sleeping");
+        }
+    }
+
+    public void setSleep(boolean b){
+        sleep = b;
+    }
+
+    public boolean getSleep(){
+        return sleep;
     }
 
     public static void main(String[] args) throws Exception {

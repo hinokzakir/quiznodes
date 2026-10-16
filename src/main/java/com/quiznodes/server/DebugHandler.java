@@ -11,11 +11,8 @@ public class DebugHandler extends debugCommunicationGrpc.debugCommunicationImplB
     }
     @Override
     public void sleep(Empty request, StreamObserver<Empty> responseObserver) {
-        try {
-            Thread.sleep(50000);
-        } catch (InterruptedException e) {
-            System.err.println("Problem with sleeping");
-        }
+        manager.setSleep(true);
+        manager.sleep();
         responseObserver.onNext(Empty.newBuilder().build());
         responseObserver.onCompleted();
     }

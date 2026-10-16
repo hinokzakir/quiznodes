@@ -30,6 +30,7 @@ public class ServerApp {
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                 System.out.println("\nStopping server on port " + port + "...");
                 manager.stopServer();
+
             }));
 
             System.out.println("Server node running on port " + port + ". Press Ctrl+C to stop.");

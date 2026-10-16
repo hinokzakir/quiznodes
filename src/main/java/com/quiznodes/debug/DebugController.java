@@ -11,6 +11,7 @@ import java.util.concurrent.TimeUnit;
 import io.grpc.StatusRuntimeException;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.Button;
 
@@ -29,6 +30,12 @@ public class DebugController {
 
     @FXML
     private ListView<String> serverListView;
+
+    @FXML
+    private Label quizCountLabel;
+
+    @FXML
+    private Label capacityLabel;
 
     @FXML
     private void initialize() {
@@ -62,6 +69,24 @@ public class DebugController {
             DebugCommunication server = servers.get(id);
             System.out.println(server);
             server.killServer();
+        }
+
+    }
+
+    @FXML
+    private void handleSleep() {
+        String selected = serverListView.getSelectionModel().getSelectedItem();
+
+        if (selected != null) {
+            String id = selected.split("\\s*\\|")[0];
+            System.out.println("Selected ID: " + id);
+            DebugCommunication server = servers.get(id);
+            try {
+                server.sleep();
+            } catch (StatusRuntimeException e) {
+                System.out.println(id + " sleeping");
+                servers.remove(id);
+            }
         }
 
     }
@@ -100,11 +125,13 @@ public class DebugController {
 
     public void sendHeartbeat() {
         List<String> toRemove =  new ArrayList<>();
+        double tot_capacity = 0;
         for (String id : servers.keySet()) {
             try {
                 DebugCommunication server = servers.get(id);
                 debugHeartbeatResponse response = server.sendHeartbeat();
                 capacities.put(id, response.getCapacity());
+                tot_capacity += response.getCapacity();
                 if (response.getLeader()) {
                     leader = id;
                 }
@@ -119,6 +146,8 @@ public class DebugController {
             servers.remove(id);
             capacities.remove(id);
         }
+        double capacity = tot_capacity / capacities.size();
+        Platform.runLater(()-> capacityLabel.setText("System Capacity: " + capacity));
         Platform.runLater(this::refreshList);
     }
 

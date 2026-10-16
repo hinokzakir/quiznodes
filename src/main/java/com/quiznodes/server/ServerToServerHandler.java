@@ -37,14 +37,10 @@ public class ServerToServerHandler extends serverToServerCommunicationGrpc.serve
         long capacity = manager.getServerCapacity();
         manager.resetElectionTimeout();
         System.out.println("Received Heartbeat");
-        /*if (!testBool) {
-            testBool = true;
-            try {
-                Thread.sleep(50000);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-        }*/
+        if (manager.getSleep()){
+            manager.sleep();
+            manager.setSleep(false);
+        }
         responseObserver.onNext(heartbeatResponse.newBuilder().setAvailableCapacity(capacity).build());
         responseObserver.onCompleted();
     }
