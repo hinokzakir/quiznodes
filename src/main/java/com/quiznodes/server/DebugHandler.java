@@ -28,7 +28,15 @@ public class DebugHandler extends debugCommunicationGrpc.debugCommunicationImplB
     public void heartbeat(Empty request, StreamObserver<debugHeartbeatResponse> responseObserver) {
         long capacity= manager.getServerCapacity();
         boolean isLeader = manager.amILeader();
-        debugHeartbeatResponse response = debugHeartbeatResponse.newBuilder().setCapacity(capacity).setLeader(isLeader).build();
+        int nrQuizzes = 0;
+        if(isLeader){
+            nrQuizzes = manager.getNrQuizzes();
+        }
+        debugHeartbeatResponse response = debugHeartbeatResponse.newBuilder()
+                .setCapacity(capacity)
+                .setLeader(isLeader)
+                .setNrQuizzes(nrQuizzes)
+                .build();
         responseObserver.onNext(response);
         responseObserver.onCompleted();
     }

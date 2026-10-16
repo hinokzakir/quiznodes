@@ -180,7 +180,7 @@ public class Manager {
         double total_max_capacity = 100 * servers.size();
         System.out.println("Capacities: " + capacities);
         System.out.println("Calculation: " + total_capacity / total_max_capacity);
-        if (total_capacity / total_max_capacity < 0.2) {
+        if (total_capacity / total_max_capacity < 0.4) {
             try {
                 startNewServer();
             } catch (IOException e) {
@@ -555,6 +555,10 @@ public class Manager {
 
     public boolean getSleep(){
         return sleep;
+    }
+
+    public int getNrQuizzes(){
+        return quizToServersMap.size();
     }
 
     public static void main(String[] args) throws Exception {

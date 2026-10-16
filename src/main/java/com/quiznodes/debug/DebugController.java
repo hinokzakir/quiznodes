@@ -21,6 +21,7 @@ public class DebugController {
     private String leader;
     private DebugServer server;
     private ScheduledExecutorService heartbeatScheduler = Executors.newSingleThreadScheduledExecutor();
+    private int nrQuizzes = 0;
 
     @FXML
     private Button shutdownButton;
@@ -134,6 +135,7 @@ public class DebugController {
                 tot_capacity += response.getCapacity();
                 if (response.getLeader()) {
                     leader = id;
+                    nrQuizzes = response.getNrQuizzes();
                 }
                 System.out.println(id + " Capacity: " + response.getCapacity());
                 System.out.println(id + " Leader: " + response.getLeader());
@@ -146,8 +148,9 @@ public class DebugController {
             servers.remove(id);
             capacities.remove(id);
         }
-        double capacity = tot_capacity / capacities.size();
+        double capacity = tot_capacity / (capacities.size() * 100);
         Platform.runLater(()-> capacityLabel.setText("System Capacity: " + capacity));
+        Platform.runLater(()-> quizCountLabel.setText("Number of Quizzes: " + nrQuizzes));
         Platform.runLater(this::refreshList);
     }
 

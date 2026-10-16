@@ -17,4 +17,5 @@ service debugCommunication {
 message debugHeartbeatResponse {
   int64 capacity = 1;
   bool leader = 2;
+  int32 nrQuizzes = 3;
 }
