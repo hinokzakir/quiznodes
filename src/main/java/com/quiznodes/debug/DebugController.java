@@ -72,6 +72,8 @@ public class DebugController {
             server.killServer();
         }
 
+        Platform.runLater(this::refreshList);
+
     }
 
     @FXML
@@ -97,6 +99,8 @@ public class DebugController {
         for (DebugCommunication server : servers.values()) {
             server.killServer();
         }
+        servers.clear();
+        Platform.runLater(this::refreshList);
     }
 
     public void addServer(String ip, int port) {

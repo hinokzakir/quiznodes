@@ -14,62 +14,81 @@ REPETITIONS = 7
 # ------------------------------------------------------------
 
 def read_log(filename):
+    """Read a log file, returning an empty list if missing or empty."""
+    if not os.path.isfile(filename) or os.path.getsize(filename) == 0:
+        print(f"Skipping missing or empty file: {filename}")
+        return []
+
     data = []
 
-    with open(filename, newline="") as file:
-        reader = csv.DictReader(file)
+    try:
+        with open(filename, newline="") as file:
+            reader = csv.DictReader(file)
 
-        required_columns = {
-            "nrMessages",
-            "latency",
-            "throughput",
-            "bandwidth",
-            "nrNodes",
-            "payloadSize",
-        }
+            required_columns = {
+                "nrMessages",
+                "latency",
+                "throughput",
+                "bandwidth",
+                "nrNodes",
+                "payloadSize",
+            }
 
-        if not required_columns.issubset(reader.fieldnames or []):
-            raise ValueError(f"Unexpected CSV columns in {filename}")
+            if not required_columns.issubset(reader.fieldnames or []):
+                print(f"Skipping file with missing or invalid columns: {filename}")
+                return []
 
-        for row in reader:
-            data.append({
-                "nrMessages": int(row["nrMessages"]),
-                "latency": float(row["latency"]),
-                "throughput": float(row["throughput"]),
-                "bandwidth": float(row["bandwidth"]),
-                "nrNodes": int(row["nrNodes"]),
-                "payloadSize": int(row["payloadSize"]),
-            })
+            for row in reader:
+                if not row or any(
+                    row.get(column) in (None, "")
+                    for column in required_columns
+                ):
+                    continue
+
+                try:
+                    data.append({
+                        "nrMessages": int(row["nrMessages"]),
+                        "latency": float(row["latency"]),
+                        "throughput": float(row["throughput"]),
+                        "bandwidth": float(row["bandwidth"]),
+                        "nrNodes": int(row["nrNodes"]),
+                        "payloadSize": int(row["payloadSize"]),
+                    })
+                except (ValueError, TypeError):
+                    print(f"Skipping invalid row in {filename}: {row}")
+
+    except (OSError, csv.Error) as e:
+        print(f"Skipping unreadable file {filename}: {e}")
+        return []
+
+    if not data:
+        print(f"Skipping file with no valid data rows: {filename}")
 
     return data
 
 
 def read_repetitions(prefix):
-    """Read available repetitions, e.g. amount_scaling.log0."""
+    """Read available non-empty repetitions, e.g. amount_scaling.log0."""
     repetitions = []
 
     for i in range(REPETITIONS):
         filename = os.path.join("logfiles", f"{prefix}{i}")
-
-        if not os.path.exists(filename):
-            print(f"Warning: {filename} not found")
-            continue
-
         run = read_log(filename)
 
         if run:
             repetitions.append(run)
 
     if not repetitions:
-        raise FileNotFoundError(
-            f"No log files found for prefix '{prefix}'"
-        )
+        print(f"No usable log files found for '{prefix}'. Skipping experiment.")
+        return []
 
     # All repetitions should contain the same configurations.
     reference = [
         (row["nrMessages"], row["payloadSize"], row["nrNodes"])
         for row in repetitions[0]
     ]
+
+    consistent_repetitions = [repetitions[0]]
 
     for run in repetitions[1:]:
         configurations = [
@@ -78,15 +97,22 @@ def read_repetitions(prefix):
         ]
 
         if configurations != reference:
-            raise ValueError(
-                f"Inconsistent configurations for prefix '{prefix}'"
+            print(
+                f"Skipping inconsistent repetition for '{prefix}'. "
+                "Its configurations differ from the first usable repetition."
             )
+            continue
 
-    print(f"{prefix}: loaded {len(repetitions)} repetitions")
-    return repetitions
+        consistent_repetitions.append(run)
+
+    print(
+        f"{prefix}: loaded {len(consistent_repetitions)} "
+        "usable repetitions"
+    )
+    return consistent_repetitions
 
 
-# The Java test writes amount_scaling.log0, size_scaling.log0, etc.
+# Load whatever data is available.
 amount_runs = read_repetitions("amount_scaling.log")
 size_runs = read_repetitions("size_scaling.log")
 node_runs = read_repetitions("node_scaling.log")
@@ -97,7 +123,7 @@ node_runs = read_repetitions("node_scaling.log")
 # ------------------------------------------------------------
 
 def average_runs(repetitions, metric):
-    """Average each configuration across all available repetitions."""
+    """Average each configuration across available repetitions."""
     return [
         statistics.mean(run[i][metric] for run in repetitions)
         for i in range(len(repetitions[0]))
@@ -121,17 +147,27 @@ def plot_scaling(
     y_label,
     title,
     filename,
+    log_x=False,
 ):
+    if not repetitions:
+        return
+
     x = get_x_values(repetitions, x_field)
     averages = average_runs(repetitions, metric)
 
     plt.figure()
     plt.plot(x, averages, marker="o", label="Average")
 
+    if log_x:
+        plt.xscale("log", base=10)
+
+    # Start the y-axis at zero to avoid exaggerating differences.
+    plt.ylim(bottom=0)
+
     plt.xlabel(x_label)
     plt.ylabel(y_label)
     plt.title(title)
-    plt.grid(True)
+    plt.grid(True, which="both")
     plt.legend()
     plt.tight_layout()
     plt.savefig(os.path.join("plots", filename), dpi=300)
@@ -145,43 +181,46 @@ METRICS = [
 ]
 
 
-# Amount scaling: vary the number of quizzes.
-for metric, ylabel, suffix in METRICS:
-    plot_scaling(
+LINE_PLOT_CONFIGS = [
+    (
         amount_runs,
         "nrMessages",
         "Number of quizzes",
-        metric,
-        ylabel,
-        f"{ylabel} - Amount Scaling",
-        f"amount_{suffix}.png",
-    )
-
-
-# Size scaling: vary the payload size per quiz.
-for metric, ylabel, suffix in METRICS:
-    plot_scaling(
+        "Amount Scaling",
+        "amount",
+    ),
+    (
         size_runs,
         "payloadSize",
         "Payload size per quiz (bytes)",
-        metric,
-        ylabel,
-        f"{ylabel} - Payload Size Scaling",
-        f"size_{suffix}.png",
-    )
-
-
-# Node scaling: vary the number of nodes.
-for metric, ylabel, suffix in METRICS:
-    plot_scaling(
+        "Payload Size Scaling",
+        "size",
+    ),
+    (
         node_runs,
         "nrNodes",
         "Number of nodes",
-        metric,
-        ylabel,
-        f"{ylabel} - Node Scaling",
-        f"nodes_{suffix}.png",
-    )
+        "Node Scaling",
+        "nodes",
+    ),
+]
+
+for runs, x_field, x_label, experiment, prefix in LINE_PLOT_CONFIGS:
+    if not runs:
+        print(f"Skipping line plots for {experiment}: no usable data.")
+        continue
+
+    for metric, ylabel, suffix in METRICS:
+        plot_scaling(
+            repetitions=runs,
+            x_field=x_field,
+            x_label=x_label,
+            metric=metric,
+            y_label=ylabel,
+            title=f"{ylabel} - {experiment}",
+            filename=f"{prefix}_{suffix}.png",
+            log_x=(prefix == "size"),
+        )
 
 
 # ------------------------------------------------------------
@@ -195,8 +234,12 @@ def make_boxplots(
     y_label,
     title,
     filename,
+    log_x=False,
 ):
-    """Each box shows the repetitions for one configuration."""
+    """Each box shows the available repetitions for one configuration."""
+    if not repetitions:
+        return
+
     x_values = get_x_values(repetitions, x_field)
 
     data_sets = [
@@ -205,48 +248,59 @@ def make_boxplots(
     ]
 
     plt.figure()
-    plt.boxplot(data_sets, tick_labels=[str(x) for x in x_values])
+
+    if log_x:
+        # Position each box at its actual payload size.
+        positions = x_values
+        widths = [max(value * 0.12, 1) for value in positions]
+
+        plt.boxplot(
+            data_sets,
+            positions=positions,
+            widths=widths,
+        )
+        plt.xscale("log", base=10)
+        plt.xticks(positions, [str(x) for x in x_values])
+    else:
+        plt.boxplot(
+            data_sets,
+            tick_labels=[str(x) for x in x_values],
+        )
+
+    # Start the y-axis at zero to avoid exaggerating differences.
+    plt.ylim(bottom=0)
 
     plt.xlabel(x_field)
     plt.ylabel(y_label)
     plt.title(title)
-    plt.grid(axis="y")
+    plt.grid(axis="y", which="both")
     plt.tight_layout()
     plt.savefig(os.path.join("plots", filename), dpi=300)
     plt.close()
 
 
 BOX_PLOT_CONFIGS = [
-    (
-        amount_runs,
-        "nrMessages",
-        "Amount Scaling",
-        "amount",
-    ),
-    (
-        size_runs,
-        "payloadSize",
-        "Payload Size Scaling",
-        "size",
-    ),
-    (
-        node_runs,
-        "nrNodes",
-        "Node Scaling",
-        "nodes",
-    ),
+    (amount_runs, "nrMessages", "Amount Scaling", "amount"),
+    (size_runs, "payloadSize", "Payload Size Scaling", "size"),
+    (node_runs, "nrNodes", "Node Scaling", "nodes"),
 ]
 
 for runs, x_field, experiment, prefix in BOX_PLOT_CONFIGS:
+    if not runs:
+        print(f"Skipping box plots for {experiment}: no usable data.")
+        continue
+
     for metric, ylabel, suffix in METRICS:
         make_boxplots(
-            runs,
-            x_field,
-            metric,
-            ylabel,
-            f"{ylabel} - {experiment}",
-            f"boxplot_{prefix}_{suffix}.png",
+            repetitions=runs,
+            x_field=x_field,
+            metric=metric,
+            y_label=ylabel,
+            title=f"{ylabel} - {experiment}",
+            filename=f"boxplot_{prefix}_{suffix}.png",
+            log_x=(prefix == "size"),
         )
 
 
-print("Plots saved to the plots/ directory.")
+print("Plot generation finished. Check the plots/ directory.")
+

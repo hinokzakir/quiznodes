@@ -524,7 +524,12 @@ public class Manager {
     }
 
     public void sendToDebugger(String ip, int port){
-        debugCommunication.sendToDebugger(ip, port);
+        try {
+
+            debugCommunication.sendToDebugger(ip, port);
+        } catch (Exception e) {
+            System.out.println("Debugger is not up");
+        }
     }
 
     public void shutdownNode() {
