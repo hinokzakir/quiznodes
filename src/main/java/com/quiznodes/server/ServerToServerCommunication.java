@@ -112,6 +112,10 @@ public class ServerToServerCommunication {
         return stub.getAllQuizzes(Empty.newBuilder().build());
     }
 
+    public void deleteAllQuizzes(){
+        stub.deleteALLQuizzes(Empty.newBuilder().build());
+    }
+
     public void shutdown(){
         if (channel != null && !channel.isShutdown()) {
             channel.shutdown();

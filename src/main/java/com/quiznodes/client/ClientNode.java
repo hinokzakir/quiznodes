@@ -80,6 +80,9 @@ public class ClientNode {
     public String sendQuiz(Quiz quiz) {
         try {
             quizMessage.Builder request = quizMessage.newBuilder().setId(quiz.getId()).setName(quiz.getName());
+            if(quiz.getTestingPayload() != null) {
+                request.setPayload(quiz.getTestingPayload());
+            }
             List<Question> questions = quiz.getQuestions();
             for (Question question : questions) {
                 questionMessage.Builder q = questionMessage.newBuilder()
@@ -131,6 +134,10 @@ public class ClientNode {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public void deleteAllQuizzes() {
+        blockingStub.deleteAllQuizzes(Empty.newBuilder().build());
     }
 
     public void shutdown() {

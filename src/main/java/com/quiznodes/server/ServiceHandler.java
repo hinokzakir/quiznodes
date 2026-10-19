@@ -72,4 +72,11 @@ public class ServiceHandler extends serviceHandlerGrpc.serviceHandlerImplBase {
         responseObserver.onNext(builder.build());
         responseObserver.onCompleted();
     }
+
+    @Override
+    public void deleteAllQuizzes(Empty request, StreamObserver<Empty> responseObserver) {
+        manager.deleteAllQuizzesFromAllServers();
+        responseObserver.onNext(Empty.newBuilder().build());
+        responseObserver.onCompleted();
+    }
 }

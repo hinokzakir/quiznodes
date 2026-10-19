@@ -561,6 +561,17 @@ public class Manager {
         return quizToServersMap.size();
     }
 
+    public void deleteAllQuizzesFromAllServers(){
+        for (ServerToServerCommunication peer : servers.values()) {
+            peer.deleteAllQuizzes();
+        }
+        quizToServersMap.clear();
+    }
+
+    public void deleteAllQuizzes(){
+        serverBackend.reset();
+    }
+
     public static void main(String[] args) throws Exception {
         Manager manager = new Manager(0, 100, false);
         manager.blockUntilShutdown();

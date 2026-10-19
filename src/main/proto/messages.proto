@@ -10,6 +10,7 @@ service serviceHandler {
     rpc getQuiz (quizId) returns (quizMessage);
     rpc getAllQuiz (Empty) returns (quizList);
     rpc sendQuiz (quizMessage) returns (quizId);
+    rpc deleteAllQuizzes (Empty) returns (Empty);
 }
 
 message Empty {
@@ -30,7 +31,8 @@ message questionMessage {
 message quizMessage {
     string id = 1;
     repeated questionMessage questions = 2;
-    string name = 3;   
+    string name = 3;
+    string payload = 4;
 }
 
 message quizList {

@@ -12,6 +12,7 @@ service serverToServerCommunication {
   rpc sendLeaderHeartbeatFirst(heartbeatRequest) returns (heartbeatResponse);
   rpc getQuiz (quizId) returns (quizMessage);
   rpc getAllQuizzes(Empty) returns (quizList);
+  rpc deleteALLQuizzes(Empty) returns (Empty);
   rpc joinNetwork (joinMessage) returns (Empty);
   rpc requestVote (requestVoteMessage) returns (responseVoteMessage);
 }

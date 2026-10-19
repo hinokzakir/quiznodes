@@ -163,4 +163,11 @@ public class ServerToServerHandler extends serverToServerCommunicationGrpc.serve
         responseObserver.onNext(response.build());
         responseObserver.onCompleted();
     }
+
+    @Override
+    public void deleteALLQuizzes(Empty request, StreamObserver<Empty> responseObserver) {
+        manager.deleteAllQuizzes();
+        responseObserver.onNext(Empty.newBuilder().build());
+        responseObserver.onCompleted();
+    }
 }

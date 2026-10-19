@@ -8,6 +8,7 @@ public class Quiz {
     private String id;
     private String name;
     private List<Question> questions;
+    private String testingPayload;
 
     public Quiz() {
         this.id = UUID.randomUUID().toString();
@@ -27,6 +28,13 @@ public class Quiz {
         this.id = id;
     }
 
+    public Quiz(int payloadSize){
+        this.testingPayload = "x".repeat(payloadSize);
+        this.id = UUID.randomUUID().toString();
+        this.name = id;
+        questions = new ArrayList<>();
+    }
+
     public String getId() {
         return id;
     }
@@ -41,6 +49,10 @@ public class Quiz {
 
     public String getName() {
         return name;
+    }
+
+    public String getTestingPayload() {
+        return testingPayload;
     }
 
     @Override
