@@ -24,7 +24,7 @@ public class ServerApp {
         final int port = 0;
 
         try {
-            Manager manager = new Manager(port, 10000, false);
+            Manager manager = new Manager(port, 100, false);
 
             // Shutdown hook for graceful exit on Ctrl+C
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {

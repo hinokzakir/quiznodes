@@ -174,7 +174,7 @@ public class DebugController {
             servers.remove(id);
             capacities.remove(id);
         }
-        double capacity = tot_capacity / (capacities.size() * 100);
+        double capacity = tot_capacity / (servers.size() * 100);
         Platform.runLater(()-> capacityLabel.setText("System Capacity: " + capacity));
         Platform.runLater(()-> quizCountLabel.setText("Number of Quizzes: " + nrQuizzes));
         Platform.runLater(this::refreshList);
