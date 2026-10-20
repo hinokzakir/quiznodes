@@ -38,7 +38,7 @@ public class PerformanceTest {
     }
 
     /*
-     * A simple performance test that uses the retrieve function
+     * A simple performance test that uses the getALlQuiz function
      * to test response time, throughput and bandwidth.
      * The results are written to a log file
      */
@@ -95,8 +95,8 @@ public class PerformanceTest {
     }
 
     /*
-     * Runs to performance test for both messenger implementations.
-     * Runs the test using different payload sizes and amounts of messages
+     * Runs to performance test.
+     * Runs the test using different payload sizes, amounts of messages and amount of servers
      * Repeats the test 7 times
      */
     public static void run(String host, int port) {
@@ -125,7 +125,7 @@ public class PerformanceTest {
 
             test = new PerformanceTest(node, "node_scaling.log" + i);
             Scanner scanner = new Scanner(System.in);
-
+            // For this part you need to manually change the number of servers in the network
             for (int nr : nrNodes) {
                 System.out.println("Make sure there are " + nr + " server nodes running. Press Enter to continue...");
                 scanner.nextLine();
