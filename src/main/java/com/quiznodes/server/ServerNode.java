@@ -5,6 +5,9 @@ import com.quiznodes.namingservice.NameService;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 
+import java.net.Inet4Address;
+import java.net.UnknownHostException;
+
 public class ServerNode {
     private String ip;
     private int port;
@@ -16,7 +19,12 @@ public class ServerNode {
     private boolean started = false;
 
     public ServerNode(int port, Manager manager) {
-        this.ip = "localhost";
+
+        try {
+            this.ip = Inet4Address.getLocalHost().getHostAddress();
+        } catch (UnknownHostException e) {
+            throw new RuntimeException(e);
+        }
         this.port = port;
         this.name = ip + ":" + port;
         this.server = ServerBuilder.forPort(port)

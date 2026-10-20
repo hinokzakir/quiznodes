@@ -17,7 +17,7 @@
         <!-- Title -->
         <Label styleClass="main-title" text="QuizNodes - Debug" />
 
-        <Label styleClass="card-title" text="Available Servers" />
+        <Label fx:id="serverAmountLabel" styleClass="card-title" text="Available Servers" />
 
         <ListView fx:id="serverListView" styleClass="dark-list-view" VBox.vgrow="ALWAYS" />
 
