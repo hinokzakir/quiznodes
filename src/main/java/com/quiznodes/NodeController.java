@@ -38,11 +38,6 @@ import java.util.List;
 
 public class NodeController {
 
-    @FXML
-    private TextField clientHostField;
-
-    @FXML
-    private TextField clientPortField;
 
     @FXML
     private Button connectClientBtn;
@@ -52,9 +47,6 @@ public class NodeController {
 
     @FXML
     private Button uploadQuizBtn;
-
-    @FXML
-    private Button getQuizBtn;
 
     @FXML
     private VBox quizListCard;
@@ -314,13 +306,13 @@ public class NodeController {
             sendQuizBtn.setVisible(visible);
             sendQuizBtn.setManaged(visible);
         }
-        if (getQuizBtn != null) {
-            getQuizBtn.setVisible(visible);
-            getQuizBtn.setManaged(visible);
-        }
         if (uploadQuizBtn != null) {
             uploadQuizBtn.setVisible(visible);
             uploadQuizBtn.setManaged(visible);
+        }
+        if (connectClientBtn != null) {
+            connectClientBtn.setVisible(!visible);
+            connectClientBtn.setManaged(!visible);
         }
     }
 

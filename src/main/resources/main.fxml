@@ -4,7 +4,6 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
-<?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
@@ -23,27 +22,19 @@
             <!-- Client Configuration Card -->
             <VBox prefHeight="375.0" prefWidth="295.0" styleClass="card" HBox.hgrow="ALWAYS">
                <children>
-                  <Label styleClass="card-title" text="Client Node" />
+                  
+                  <VBox spacing="8.0" styleClass="input-group" />
                   
                   <VBox spacing="8.0" styleClass="input-group">
                      <children>
-                        <Label styleClass="field-label" text="Host Address" />
-                        <TextField fx:id="clientHostField" promptText="localhost" text="localhost" />
-                     </children>
-                  </VBox>
-                  
-                  <VBox spacing="8.0" styleClass="input-group">
-                     <children>
-                        <Label styleClass="field-label" text="Port Number" />
-                          <Button fx:id="connectClientBtn" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleConnectClient" styleClass="primary-button" text="Connect Client" />
-                        <Button fx:id="sendQuizBtn" managed="false" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleSendQuiz" prefHeight="42.0" prefWidth="112.0" styleClass="primary-button" text="Send Quiz" visible="false" />
+                          <Button fx:id="connectClientBtn" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleConnectClient" prefHeight="115.0" prefWidth="392.0" styleClass="primary-button" text="Connect Client" />
+                        <Button fx:id="sendQuizBtn" managed="false" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleSendQuiz" prefHeight="42.0" prefWidth="112.0" styleClass="primary-button" text="Send Empty Quiz" visible="false" />
                         <Button fx:id="uploadQuizBtn" layoutX="10.0" layoutY="10.0" managed="false" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleUploadQuiz" prefHeight="42.0" prefWidth="112.0" styleClass="primary-button" text="Upload Quiz" visible="false" />
-                        <Button fx:id="getQuizBtn" managed="false" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleGetQuiz" prefHeight="42.0" prefWidth="112.0" styleClass="primary-button" text="Get Quiz" visible="false" />
                      </children>
                   </VBox>
                   
                   <!-- Spacer to push controls to the bottom -->
-                  <VBox VBox.vgrow="ALWAYS" />
+                  <VBox prefHeight="215.0" prefWidth="392.0" VBox.vgrow="ALWAYS" />
                   
                   <VBox alignment="CENTER" spacing="10.0">
                       <children>
