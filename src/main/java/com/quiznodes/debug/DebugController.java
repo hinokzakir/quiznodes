@@ -103,6 +103,21 @@ public class DebugController {
         Platform.runLater(this::refreshList);
     }
 
+    @FXML
+    private void handleShutdownDebug(){
+        int killed = 0;
+        for (String id : servers.keySet()) {
+            if(!Objects.equals(id, leader)) {
+                DebugCommunication server = servers.get(id);
+                server.killServer();
+                killed++;
+                if (killed == 17) {
+                    break;
+                }
+            }
+        }
+    }
+
     public void addServer(String ip, int port) {
         String id = ip + ":" + port;
         servers.put(id, new DebugCommunication(ip, port));
