@@ -1,23 +1,28 @@
 package com.quiznodes.debug;
 
-import com.quiznodes.proto.debugHeartbeatResponse;
-
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import com.quiznodes.proto.debugHeartbeatResponse;
+
 import io.grpc.StatusRuntimeException;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
-import javafx.scene.control.Button;
 
 public class DebugController {
-    private Map<String, DebugCommunication> servers = new HashMap<>();
-    private Map<String, Long> capacities = new HashMap<>();
+
+    private Map<String, DebugCommunication> servers = new ConcurrentHashMap<>();
+    private Map<String, Long> capacities = new ConcurrentHashMap<>();
     private String leader;
     private DebugServer server;
     private ScheduledExecutorService heartbeatScheduler = Executors.newSingleThreadScheduledExecutor();
@@ -39,6 +44,9 @@ public class DebugController {
     private Label capacityLabel;
 
     @FXML
+    private Label serverAmountLabel;
+
+    @FXML
     private void initialize() {
         Thread serverThread = new Thread(() -> {
             try {
@@ -52,11 +60,17 @@ public class DebugController {
         serverThread.start();
     }
 
+    private void updateServerCount() {
+        int currentSize = servers.size();
+        Platform.runLater(() -> serverAmountLabel.setText("Amount Servers: " + currentSize));
+    }
+
     @FXML
     private void handleSpawn() {
         DebugCommunication leaderServer = servers.get(leader);
         if (leaderServer != null) {
             leaderServer.spawnServer();
+            updateServerCount();
         }
     }
 
@@ -70,10 +84,10 @@ public class DebugController {
             DebugCommunication server = servers.get(id);
             System.out.println(server);
             server.killServer();
+            updateServerCount();
         }
 
         Platform.runLater(this::refreshList);
-
     }
 
     @FXML
@@ -89,25 +103,26 @@ public class DebugController {
             } catch (StatusRuntimeException e) {
                 System.out.println(id + " sleeping");
                 servers.remove(id);
+                updateServerCount();
             }
         }
-
     }
 
     @FXML
-    private void handleShutdownAll(){
+    private void handleShutdownAll() {
         for (DebugCommunication server : servers.values()) {
             server.killServer();
         }
         servers.clear();
+        updateServerCount();
         Platform.runLater(this::refreshList);
     }
 
     @FXML
-    private void handleShutdownDebug(){
+    private void handleShutdownDebug() {
         int killed = 0;
         for (String id : servers.keySet()) {
-            if(!Objects.equals(id, leader)) {
+            if (!Objects.equals(id, leader)) {
                 DebugCommunication server = servers.get(id);
                 server.killServer();
                 killed++;
@@ -116,19 +131,22 @@ public class DebugController {
                 }
             }
         }
+        updateServerCount();
     }
 
     public void addServer(String ip, int port) {
         String id = ip + ":" + port;
         servers.put(id, new DebugCommunication(ip, port));
+        updateServerCount();
         System.out.println("addServer ip:" + id);
         Platform.runLater(() -> serverListView.getItems().add(formatEntry(id, null, false)));
         Thread hbThread = new Thread(() -> {
             try {
                 debugHeartbeatResponse response = servers.get(id).sendHeartbeat();
                 capacities.put(id, response.getCapacity());
-                if (response.getLeader())
+                if (response.getLeader()) {
                     leader = id;
+                }
                 Platform.runLater(this::refreshList);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -137,6 +155,7 @@ public class DebugController {
         hbThread.setDaemon(true);
         hbThread.start();
     }
+
     public void startLeaderHeartbeat() {
         heartbeatScheduler = Executors.newSingleThreadScheduledExecutor(r -> {
             Thread t = new Thread(r, "client-heartbeat-thread");
@@ -151,7 +170,7 @@ public class DebugController {
     }
 
     public void sendHeartbeat() {
-        List<String> toRemove =  new ArrayList<>();
+        List<String> toRemove = new ArrayList<>();
         double tot_capacity = 0;
         for (String id : servers.keySet()) {
             try {
@@ -174,9 +193,12 @@ public class DebugController {
             servers.remove(id);
             capacities.remove(id);
         }
+        
+        updateServerCount();
+
         double capacity = tot_capacity / (capacities.size() * 100);
-        Platform.runLater(()-> capacityLabel.setText("System Capacity: " + capacity));
-        Platform.runLater(()-> quizCountLabel.setText("Number of Quizzes: " + nrQuizzes));
+        Platform.runLater(() -> capacityLabel.setText("System Capacity: " + capacity));
+        Platform.runLater(() -> quizCountLabel.setText("Number of Quizzes: " + nrQuizzes));
         Platform.runLater(this::refreshList);
     }
 
