@@ -33,6 +33,7 @@
             <Button fx:id="shutdownBtn" mnemonicParsing="false" onAction="#handleShutdown" styleClass="primary-button" text="Shutdown server" />
             <Button fx:id="sleepBtn" mnemonicParsing="false" onAction="#handleSleep" styleClass="primary-button" text="Sleep server" />
             <Button fx:id="shutdownAllBtn" mnemonicParsing="false" onAction="#handleShutdownAll" styleClass="primary-button" text="Shutdown All Servers" />
+            <Button fx:id="shutdownseventeenBtn" mnemonicParsing="false" onAction="#handleShutdownDebug" styleClass="primary-button" text="Shutdown 17 Servers" />
         </HBox>
     </children>
 </VBox>
