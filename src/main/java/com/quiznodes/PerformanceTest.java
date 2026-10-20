@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -50,6 +51,9 @@ public class PerformanceTest {
             node.sendQuiz(quiz);
         }
 
+        Quiz quiz = new Quiz(payloadSize);
+        System.out.println("Quiz size: " + quiz.getTestingPayload().getBytes(StandardCharsets.UTF_8).length);
+
         long t1 = System.currentTimeMillis();
         List<Quiz> quizzes = node.getAllQuiz();
         long t2 = System.currentTimeMillis();
@@ -57,7 +61,6 @@ public class PerformanceTest {
         System.out.println("retrieved " + quizzes.size() + " quizzes in " + (t2 - t1) + " ms (sequential)");
 
         long latency = t2 - t1;
-
 
 
         double throughput = calculateThroughput(nrMessages, latency);
@@ -98,13 +101,13 @@ public class PerformanceTest {
      */
     public static void run(String host, int port) {
         System.out.println("Starting performance test...");
+        ClientNode node = new ClientNode(host, port);
         for(int i = 0; i < 7; i++) {
-            ClientNode node = new ClientNode(host, port);
             PerformanceTest test = new PerformanceTest(node, "amount_scaling.log" + i);
 
             int[] nrMessages = {10, 100, 250, 500, 1000};
             int[] sizes = {64, 1024, 10240, 102400};
-            int[] nrNodes = {3,5,10,50,100};
+            int[] nrNodes = {3,5,10,15,20};
 
             for (int nr : nrMessages) {
                 test.testQuizRetrieval(nr, 1024, 3);
@@ -121,18 +124,26 @@ public class PerformanceTest {
             test.close();
 
             test = new PerformanceTest(node, "node_scaling.log" + i);
+            Scanner scanner = new Scanner(System.in);
 
             for (int nr : nrNodes) {
-                Scanner scanner = new Scanner(System.in);
-
-                System.out.println("Press Enter to continue...");
+                System.out.println("Make sure there are " + nr + " server nodes running. Press Enter to continue...");
                 scanner.nextLine();
                 test.testQuizRetrieval(100, 1024, nr);
             }
 
             test.close();
 
+            System.out.println("Make sure there are 3 server nodes running. Press Enter to continue...");
+            scanner.nextLine();
+
         }
         System.out.println("Performance test finished.");
+        node.shutdown();
+
+    }
+
+    public static void main(String[] args) {
+        PerformanceTest.run("localhost", 38555);
     }
 }
