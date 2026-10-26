@@ -21,13 +21,13 @@ public class NameServiceHandler {
 
     public NameService connectNamingService() {
         try {
-            Registry registry = LocateRegistry.getRegistry("localhost", 1099);
+            Registry registry = LocateRegistry.getRegistry("localhost", 1200);
             this.nameService = (NameService) registry.lookup("QuizNodeNamingService");
-            System.out.println("Connected to Name Service at localhost:1099");
+            System.out.println("Connected to Name Service at localhost:1200");
             nameServiceAvailable = true;
             return nameService;
         } catch (Exception e) {
-            System.out.println("Name Service not available at localhost:1099");
+            System.out.println("Name Service not available at localhost:1200");
             return null;
         }
     }

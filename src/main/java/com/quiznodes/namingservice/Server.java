@@ -9,7 +9,7 @@ import java.util.Map;
 public class Server implements NameService {
 
     private final Map<String, Map<String, Integer>> serverMap = new ConcurrentHashMap<>();
-    private final static int port = 1099;
+    private final static int port = 1200;
 
     @Override
     public Map<String, Map<String, Integer>> resolveGroup() {

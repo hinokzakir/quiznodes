@@ -4,11 +4,11 @@ A distributed file system for quizzes in JSON format. Quizzes are replicated acr
 
 ## Ports
 
-| Service | Port | Protocol | Description |
-|---|---|---|---|
-| Naming Service | `1099` | Java RMI | Node registry and cluster discovery |
-| Leader Info | `1337` | gRPC | Tracks active leader node endpoint |
-| Debugger | `1112` | gRPC | Cluster monitoring tool (optional) |
+| Service | Port    | Protocol | Description |
+|---|---------|---|---|
+| Naming Service | `1200`  | Java RMI | Node registry and cluster discovery |
+| Leader Info | `1337`  | gRPC | Tracks active leader node endpoint |
+| Debugger | `1112`  | gRPC | Cluster monitoring tool (optional) |
 | Server Nodes | Dynamic | gRPC | Inter-server replication & client API |
 | Client Nodes | Dynamic | gRPC | JavaFX desktop client |
 
