@@ -1,6 +1,6 @@
 # QuizNodes
 
-A distributed file system for quizzes in JSON format. Quizzes are replicated across server nodes with dynamic capacity management, and clients connect through a desktop GUI to browse, upload, and take quizzes.
+A distributed file system for quizzes in JSON format. Quizzes are replicated across server nodes with dynamic capacity management, and clients connect through a desktop GUI to browse, upload, and take quizzes. Note that for this submission, everything runs on localhost for convenience.
 
 ## Ports
 
