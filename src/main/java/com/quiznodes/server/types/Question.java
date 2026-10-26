@@ -3,6 +3,7 @@ package com.quiznodes.server.types;
 import java.util.UUID;
 import java.util.List;
 
+//Class for a question in a quiz
 public class Question {
     private String id;
     private final String question;

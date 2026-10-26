@@ -19,7 +19,6 @@
       <HBox spacing="30.0" VBox.vgrow="ALWAYS">
          <children>
 
-            <!-- Client Configuration Card -->
             <VBox prefHeight="375.0" prefWidth="295.0" styleClass="card" HBox.hgrow="ALWAYS">
                <children>
                   
@@ -32,8 +31,7 @@
                         <Button fx:id="uploadQuizBtn" layoutX="10.0" layoutY="10.0" managed="false" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleUploadQuiz" prefHeight="42.0" prefWidth="112.0" styleClass="primary-button" text="Upload Quiz" visible="false" />
                      </children>
                   </VBox>
-                  
-                  <!-- Spacer to push controls to the bottom -->
+
                   <VBox prefHeight="215.0" prefWidth="392.0" VBox.vgrow="ALWAYS" />
                   
                   <VBox alignment="CENTER" spacing="10.0">
@@ -44,12 +42,10 @@
                </children>
             </VBox>
 
-            <!-- Available Quizzes Card (Hidden by default) -->
             <VBox fx:id="quizListCard" managed="false" styleClass="card" visible="false" HBox.hgrow="ALWAYS">
                <children>
                   <Label styleClass="card-title" text="Available Quizzes" />
-                  
-                  <!-- ListView to display the quizzes -->
+
                   <ListView fx:id="quizListView" styleClass="dark-list-view" VBox.vgrow="ALWAYS" />
                   
                </children>

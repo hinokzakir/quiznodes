@@ -1,5 +1,6 @@
 package com.quiznodes.server;
 
+//Class used during elections
 public class ElectionHandler {
     private boolean hasVoted = false;
     private int votes = 0;

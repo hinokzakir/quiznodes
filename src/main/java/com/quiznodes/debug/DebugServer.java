@@ -5,6 +5,7 @@ import io.grpc.ServerBuilder;
 
 import java.io.IOException;
 
+//Sets up server for gRPC communication for the debugger
 public class DebugServer {
     private String ip;
     private int port;

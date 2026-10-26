@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
+//Storing info and quizzes
 public class ServerBackend {
     private int maxCapacity;
     private HashMap<String, Quiz> quizzes;

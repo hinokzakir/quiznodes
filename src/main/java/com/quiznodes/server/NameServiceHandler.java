@@ -8,6 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import com.quiznodes.namingservice.*;;
 
+//Handling communication with nameService
 public class NameServiceHandler {
     private NameService nameService;
     public boolean nameServiceAvailable = false;
@@ -38,7 +39,8 @@ public class NameServiceHandler {
             System.out.println("I am alone. I am leader");
             manager.setIamLeader();
         } else {
-            manager.setState(2); // follower
+            // follower
+            manager.setState(2);
         }
         for (Map.Entry<String, Map<String, Integer>> entry : nodes.entrySet()) {
             String nodeName = entry.getKey();
@@ -62,10 +64,6 @@ public class NameServiceHandler {
                 } catch (Exception e) {
                     System.err.println("Could not connect to stale node " + nodeIp + ":" + nodePort + " - ignoring.");
                 }
-                // this is when i we know how to connect server nodes
-                // boolean ok = connect(nodeIp, nodePort);
-                // System.out.println("Connect to " + nodeName + " -> " + (ok ? "OK" :
-                // "FAILED"));
             }
         }
     }
@@ -73,7 +71,6 @@ public class NameServiceHandler {
     public void registerNode(String name, String ip, int port) {
         if (nameServiceAvailable) {
             try {
-                // Initial resolve + connect.
                 nameService.registerNode(name, ip, port);
                 System.out.println(
                         "Registered with Name Service: [Name]: " + name + ", [IP]: " + ip + ", [Port]: " + port);

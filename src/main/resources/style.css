@@ -1,11 +1,10 @@
-/* --- Global Settings --- */
+
 .root-pane {
     -fx-background-color: #0F111A;
-    /* Very deep dark blue/gray */
     -fx-font-family: "Segoe UI", "Inter", -apple-system, sans-serif;
 }
 
-/* --- Typography --- */
+
 .main-title {
     -fx-text-fill: #FFFFFF;
     -fx-font-size: 28px;
@@ -33,13 +32,10 @@
     -fx-padding: 5 0 0 0;
 }
 
-/* --- Layout Components --- */
 .card {
     -fx-background-color: #1E212B;
-    /* Slightly lighter than background */
     -fx-background-radius: 12;
     -fx-padding: 25;
-    /* This creates the modern "floating" aesthetic */
     -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.25), 15, 0, 0, 8);
 }
 
@@ -47,10 +43,8 @@
     -fx-padding: 0 0 15 0;
 }
 
-/* --- Inputs (Borderless and Flat) --- */
 .text-field {
     -fx-background-color: #292D39;
-    /* Input background */
     -fx-text-fill: #F8FAFC;
     -fx-prompt-text-fill: #64748B;
     -fx-background-radius: 8;
@@ -64,20 +58,16 @@
 .text-field:focused {
     -fx-background-color: #2D3242;
     -fx-border-color: #ffa705;
-    /* Indigo Accent */
 }
 
-/* --- Buttons --- */
 .primary-button {
     -fx-background-color: #ffa600;
-    /* Vibrant Indigo */
     -fx-text-fill: #FFFFFF;
     -fx-font-size: 14px;
     -fx-font-weight: 700;
     -fx-background-radius: 8;
     -fx-padding: 12 20 12 20;
     -fx-cursor: hand;
-    /* Subtle glow effect on the button */
     -fx-effect: dropshadow(three-pass-box, rgba(93, 73, 5, 0.4), 10, 0, 0, 4);
 }
 
@@ -89,19 +79,16 @@
     -fx-background-color: #745b03;
     -fx-effect: none;
     -fx-translate-y: 2;
-    /* Pressed animation */
 }
 
-/* --- ListView (Dark Theme for Quizzes) --- */
 .dark-list-view {
-    -fx-background-color: #292D39; /* Matches text fields */
+    -fx-background-color: #292D39;
     -fx-border-color: transparent;
     -fx-background-radius: 8;
     -fx-border-radius: 8;
     -fx-padding: 5;
 }
 
-/* Individual list items */
 .dark-list-view .list-cell {
     -fx-background-color: transparent;
     -fx-text-fill: #F8FAFC;
@@ -109,20 +96,18 @@
     -fx-font-size: 14px;
 }
 
-/* Hover effect on list items */
+
 .dark-list-view .list-cell:filled:hover {
     -fx-background-color: #2D3242;
     -fx-background-radius: 5;
 }
 
-/* Selected item highlight */
 .dark-list-view .list-cell:filled:selected {
-    -fx-background-color: #6366F1; /* Indigo Accent */
+    -fx-background-color: #6366F1;
     -fx-text-fill: #FFFFFF;
     -fx-background-radius: 5;
 }
 
-/* Clean up the scrollbar */
 .dark-list-view .scroll-bar:vertical {
     -fx-background-color: transparent;
 }

@@ -19,6 +19,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 
+//Main class linking the debug GUI with the backend and communication protocols of the debugger
 public class DebugController {
 
     private Map<String, DebugCommunication> servers = new ConcurrentHashMap<>();
@@ -118,6 +119,7 @@ public class DebugController {
         Platform.runLater(this::refreshList);
     }
 
+    //This is a very specific button used when performance testing
     @FXML
     private void handleShutdownDebug() {
         int killed = 0;

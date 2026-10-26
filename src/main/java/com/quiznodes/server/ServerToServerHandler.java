@@ -8,12 +8,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+//Handles incoming messages from other servers
 public class ServerToServerHandler extends serverToServerCommunicationGrpc.serverToServerCommunicationImplBase {
     private Manager manager;
     public ServerToServerHandler(Manager manager) {
         this.manager = manager;
     }
-    private boolean testBool = false;
 
     @Override
     public void replicateQuiz(quizMessage request, StreamObserver<replicateResponse> responseObserver) {
@@ -53,7 +53,6 @@ public class ServerToServerHandler extends serverToServerCommunicationGrpc.serve
         manager.resetElectionTimeout();
         System.out.println("Received Heartbeat and new server list");
 
-        // here i need to add something to update the availible list of connected peers
         if(manager.getState() != 0) {
             manager.updateServerList(leaderServers);
         }
@@ -103,12 +102,10 @@ public class ServerToServerHandler extends serverToServerCommunicationGrpc.serve
     public void requestVote(requestVoteMessage request, StreamObserver<responseVoteMessage> responseObserver) {
         // handling voting request from server
         responseVoteMessage.Builder builder = responseVoteMessage.newBuilder();
-        
-        // first we need to check if we already have voted
 
         if(manager.getState() != 0) {
             if (request.getTerm() > manager.electionHandler.getTerm()) {
-                manager.setState(2); // set server to candidate since we are 1 term behind
+                manager.setState(2);
                 manager.electionHandler.setTerm(request.getTerm());
                 manager.electionHandler.setHasVoted(false);
             }

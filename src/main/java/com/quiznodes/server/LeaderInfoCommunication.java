@@ -1,12 +1,11 @@
 package com.quiznodes.server;
 
-import com.quiznodes.proto.Empty;
 import com.quiznodes.proto.leaderInfoCommunicationGrpc;
 import com.quiznodes.proto.leaderInfoMessage;
-import com.quiznodes.proto.serviceHandlerGrpc;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 
+//Used for communicating with the leader info server
 public class LeaderInfoCommunication {
     private final ManagedChannel channel;
     private final leaderInfoCommunicationGrpc.leaderInfoCommunicationBlockingStub blockingStub;

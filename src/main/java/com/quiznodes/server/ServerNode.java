@@ -8,6 +8,7 @@ import io.grpc.ServerBuilder;
 import java.net.Inet4Address;
 import java.net.UnknownHostException;
 
+//Creates the server for the server node
 public class ServerNode {
     private String ip;
     private int port;
@@ -53,8 +54,6 @@ public class ServerNode {
                     System.out.println(
                             "Registered with Name Service: [Name]: " + name + ", [IP]: " + ip + ", [Port]: " + port);
 
-                    // Initial resolve + connect.
-
                     nameServiceHandler.syncAndConnectNodes(name);
                 } catch (Exception e) {
                     System.err.println("Error during name service registration/resolution: " + e.getMessage());
@@ -94,12 +93,4 @@ public class ServerNode {
     }
 
 
-    /*
-     * public static void main(String[] args) throws Exception {
-     * int port = 0;
-     * ServerNode server = new ServerNode(port);
-     * server.start();
-     * server.server.awaitTermination();
-     * }
-     */
 }

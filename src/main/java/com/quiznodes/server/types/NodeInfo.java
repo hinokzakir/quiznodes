@@ -1,5 +1,6 @@
 package com.quiznodes.server.types;
 
+//Class for keeping capacity info about a server node
 public class NodeInfo {
     private long space;
     private long max_capacity;

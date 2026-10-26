@@ -1,14 +1,8 @@
 package com.quiznodes.server;
 
-import com.quiznodes.server.DebugCommunication;
-import com.quiznodes.debug.DebugController;
 import com.quiznodes.proto.*;
-import com.quiznodes.server.LeaderInfoCommunication;
-import com.quiznodes.server.types.NodeInfo;
 import com.quiznodes.server.types.Question;
 import com.quiznodes.server.types.Quiz;
-//import com.quiznodes.server.types.ServerInfo;
-import com.quiznodes.server.types.ServerInfo;
 
 import java.io.IOException;
 import java.util.*;
@@ -18,6 +12,11 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/*
+ * The class linking the entire server node together
+ * Responsible for calling the appropriate communication protocol
+ * Also responsible for sending heartbeats, starting elections, redistributing quizes etc
+ */
 public class Manager {
     private ServerBackend serverBackend;
     private ServerNode server;
@@ -29,7 +28,7 @@ public class Manager {
     private final ScheduledExecutorService heartbeatScheduler = Executors.newSingleThreadScheduledExecutor();
     private List<Process> serversStarted = new ArrayList<>();
     private LeaderInfoCommunication leaderInfoCommunication;
-    public ElectionHandler electionHandler; // under construction
+    public ElectionHandler electionHandler;
     private ScheduledFuture<?> electionTimeoutTask;
     private static AtomicInteger nextServerId = new AtomicInteger(0);
     boolean startUpFlag = false;
@@ -67,7 +66,6 @@ public class Manager {
                 "com.quiznodes.ServerApp");
 
         processBuilder.inheritIO();
-        System.out.println(processBuilder.directory());
 
         Process process = processBuilder.start();
         serversStarted.add(process);
@@ -141,6 +139,7 @@ public class Manager {
                 TimeUnit.SECONDS);
     }
 
+    //Sends leader heartbeat, calculates capacity, starts new servers and removes dead servers
     public void sendLeaderHeartbeat() {
         double total_capacity = 0;
         List<Integer> toRemove = new ArrayList<>();
@@ -152,7 +151,6 @@ public class Manager {
                 total_capacity += capacity;
             }else {
                 toRemove.add(i);
-                System.out.println("Should remove" + i);
             }
         }
         toRemove.sort(Comparator.reverseOrder());
@@ -176,10 +174,12 @@ public class Manager {
                 list.remove(Integer.valueOf(i));
             }
         }
-        if (servers.isEmpty()) return;
+        if (servers.isEmpty()) {
+            return;
+        }
         double total_max_capacity = 100 * servers.size();
         System.out.println("Capacities: " + capacities);
-        System.out.println("Calculation: " + total_capacity / total_max_capacity);
+        System.out.println("System Capacity: " + total_capacity / total_max_capacity);
         if (total_capacity / total_max_capacity < 0.4) {
             try {
                 startNewServer();
@@ -187,28 +187,9 @@ public class Manager {
                 throw new RuntimeException(e);
             }
         }
-
-        /*int replicationFactor;
-        int nrServers = servers.size() - fullServers.size();
-        if (nrServers == 1) {
-            replicationFactor = 1;
-        } else if (nrServers < 4) {
-            replicationFactor = 2;
-        } else {
-            replicationFactor = 3;
-        }
-
-        for (String id: quizToServersMap.keySet()) {
-            int size = quizToServersMap.get(id).size();
-            if(size < replicationFactor){
-                int difference = replicationFactor - size;
-                for(int i = 0; i < difference; i++){
-                    re
-                }
-            }
-        }*/
     }
 
+    //First heartbeat when a new leader is elected
     public void sendLeaderHeartbeatFirst() {
         System.out.println("Sending my list of nodes, amount: " + servers.size());
         double total_capacity = 0;
@@ -319,6 +300,8 @@ public class Manager {
                 System.out.println("Sending RequestVote...");
                 responseVoteMessage response = peer.requestVote(server.getIp(), server.getPort(), newTerm);
                 System.out.println("Vote result: " + response.getVoteGranted() + " (term: " + response.getTerm() + ")");
+
+                //There is already a leader, I am out of sync and need to reset
                 if(response.getIAmLeader()){
                     setState(2);
                     electionHandler.setTerm(response.getTerm());
@@ -379,7 +362,8 @@ public class Manager {
         }
 
         if (this.state != 0) {
-            int timeoutSeconds = 12 + new Random().nextInt(5); // gives random timeout 12-16s
+            // gives random timeout 12-16s
+            int timeoutSeconds = 12 + new Random().nextInt(5);
             electionTimeoutTask = heartbeatScheduler.schedule(() -> {
                 System.out.println("Heartbeat timeout reached! Starting leader election...");
                 // remove the leader from servers list
@@ -387,6 +371,8 @@ public class Manager {
             }, timeoutSeconds, TimeUnit.SECONDS);
         }
     }
+
+    //Redistributes quizzes from a server that has died
     public void redistributeRemovedServerQuizzes(int serverIndex, List<Integer> serversToRemove) {
         for(String quizId: quizToServersMap.keySet()){
             List<Integer> serversToNotReplicateTo = quizToServersMap.get(quizId);
@@ -443,10 +429,10 @@ public class Manager {
         int myPort = server.getPort();
         for (ServerToServerCommunication peer : servers.values()) {
             if (peer.getPort() < myPort) {
-                return false; // A peer has a lower port, let them spawn it
+                return false;
             }
         }
-        return true; // I have the lowest port among all active nodes
+        return true;
     }
 
     public synchronized void updateServerList(List<serverInfo> newServerList) {
@@ -525,7 +511,6 @@ public class Manager {
 
     public void sendToDebugger(String ip, int port){
         try {
-
             debugCommunication.sendToDebugger(ip, port);
         } catch (Exception e) {
             System.out.println("Debugger is not up");
@@ -539,10 +524,6 @@ public class Manager {
         server.stop();
         heartbeatScheduler.shutdownNow();
 
-    }
-
-    public boolean getDebugShutdown(){
-        return debugShutdown;
     }
 
     public void sleep(){
@@ -566,6 +547,7 @@ public class Manager {
         return quizToServersMap.size();
     }
 
+    //For performance testing
     public void deleteAllQuizzesFromAllServers(){
         for (ServerToServerCommunication peer : servers.values()) {
             peer.deleteAllQuizzes();
@@ -573,10 +555,12 @@ public class Manager {
         quizToServersMap.clear();
     }
 
+    //For performance testing
     public void deleteAllQuizzes(){
         serverBackend.reset();
     }
 
+    //Not currently used
     public static void main(String[] args) throws Exception {
         Manager manager = new Manager(0, 100, false);
         manager.blockUntilShutdown();

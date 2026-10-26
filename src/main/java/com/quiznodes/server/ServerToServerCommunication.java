@@ -1,10 +1,8 @@
 package com.quiznodes.server;
 
-import com.google.rpc.context.AttributeContext;
 import com.quiznodes.proto.*;
 import com.quiznodes.server.types.Question;
 import com.quiznodes.server.types.Quiz;
-import com.quiznodes.server.types.ServerInfo;
 
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
@@ -12,9 +10,9 @@ import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+//Handles communication between servers
 public class ServerToServerCommunication {
     private serverToServerCommunicationGrpc.serverToServerCommunicationBlockingStub stub;
     private String host;
@@ -102,8 +100,7 @@ public class ServerToServerCommunication {
             .setPort(port)
             .setTerm(term)
             .build();
-        
-        // handle response from other node
+
         responseVoteMessage response = stub.requestVote(message);
         return response;     
     }

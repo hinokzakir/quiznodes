@@ -5,6 +5,7 @@ import com.quiznodes.proto.debugCommunicationGrpc;
 import com.quiznodes.proto.joinMessage;
 import io.grpc.stub.StreamObserver;
 
+//Used for handling incoming debug messages
 public class DebugHandler extends debugCommunicationGrpc.debugCommunicationImplBase{
     DebugController controller;
     public DebugHandler(DebugController controller){

@@ -1,5 +1,6 @@
 package com.quiznodes.info;
 
+//Keeps track of current leader
 public class LeaderInfoBackend {
     private String currentLeaderIp;
     private int currentLeaderPort;

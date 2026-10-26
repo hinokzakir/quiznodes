@@ -4,6 +4,7 @@ import io.grpc.stub.StreamObserver;
 
 import java.io.IOException;
 
+//Used for handling incoming messages from the debugger
 public class DebugHandler extends debugCommunicationGrpc.debugCommunicationImplBase{
     Manager manager;
     public DebugHandler(Manager manager){

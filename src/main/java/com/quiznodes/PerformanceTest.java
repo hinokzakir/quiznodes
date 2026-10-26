@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
+// A simple performance test for quizNodes
 public class PerformanceTest {
     private final ClientNode node;
     private final PrintWriter logWriter;

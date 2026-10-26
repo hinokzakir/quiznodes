@@ -4,6 +4,7 @@ import com.quiznodes.proto.*;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 
+//Used for communicating with the debugger
 public class DebugCommunication {
     private final ManagedChannel channel;
     private final debugCommunicationGrpc.debugCommunicationBlockingStub blockingStub;

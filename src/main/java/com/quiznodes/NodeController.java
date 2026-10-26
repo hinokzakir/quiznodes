@@ -36,6 +36,7 @@ import java.io.File;
 
 import java.util.List;
 
+//Main class linking the client GUI with the backend and communication protocols of the client
 public class NodeController {
 
 
@@ -95,7 +96,6 @@ public class NodeController {
         if (selectedFile != null) {
             System.out.println("Selected file: " + selectedFile.getAbsolutePath());
 
-            // Use your JsonConverter to parse the file
             JsonConverter converter = new JsonConverter();
             Quiz newQuiz = converter.convertQuiz(selectedFile);
 
@@ -132,7 +132,6 @@ public class NodeController {
     private void handleConnectClient() {
         CompletableFuture.runAsync(() -> {
             try {
-                // this can be removed later, now leader info is updated at button press
                 leaderInfoMessage leaderResponse = leaderInfoCommunication.getLeader();
                 this.leaderIp = leaderResponse.getIp();
                 this.leaderPort = leaderResponse.getPort();
@@ -284,7 +283,6 @@ public class NodeController {
     }
 
     private void handleConnectionLost(String message) {
-        // stopHeartbeat();
         if (activeClient != null) {
             try {
                 activeClient.shutdown();

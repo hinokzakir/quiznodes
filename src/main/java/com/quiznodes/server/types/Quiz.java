@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+//Class representing a quiz
 public class Quiz {
     private String id;
     private String name;
@@ -28,6 +29,7 @@ public class Quiz {
         this.id = id;
     }
 
+    //For performance testing
     public Quiz(int payloadSize){
         this.testingPayload = "x".repeat(payloadSize);
         this.id = UUID.randomUUID().toString();

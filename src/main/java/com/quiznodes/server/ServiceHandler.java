@@ -1,6 +1,5 @@
 package com.quiznodes.server;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -10,6 +9,7 @@ import com.quiznodes.server.types.*;
 
 import io.grpc.stub.StreamObserver;
 
+//Handling incoming messages from the client
 public class ServiceHandler extends serviceHandlerGrpc.serviceHandlerImplBase {
     private final Manager manager;
 

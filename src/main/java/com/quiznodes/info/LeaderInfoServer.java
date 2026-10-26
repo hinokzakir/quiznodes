@@ -1,12 +1,10 @@
 package com.quiznodes.info;
 
-import com.quiznodes.server.ServerToServerHandler;
-import com.quiznodes.server.ServiceHandler;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
-
 import java.io.IOException;
 
+//Sets up the leader info server
 public class LeaderInfoServer {
     private String ip;
     private int port;
@@ -18,6 +16,7 @@ public class LeaderInfoServer {
                 .addService(new LeaderInfoHandler())
                 .build();
         this.server.start();
+        System.out.println("Server started, listening on " + this.ip + ":" + this.port);
         this.server.awaitTermination();
     }
 

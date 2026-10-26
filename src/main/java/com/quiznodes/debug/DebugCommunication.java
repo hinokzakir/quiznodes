@@ -7,6 +7,7 @@ import io.grpc.StatusRuntimeException;
 
 import java.util.concurrent.TimeUnit;
 
+//Used for sending debug messages to the server cluster
 public class DebugCommunication {
     private final ManagedChannel channel;
     private final debugCommunicationGrpc.debugCommunicationBlockingStub blockingStub;

@@ -5,6 +5,7 @@ import com.quiznodes.proto.leaderInfoCommunicationGrpc;
 import com.quiznodes.proto.leaderInfoMessage;
 import io.grpc.stub.StreamObserver;
 
+//Handles incoming gRPC messaged to the leader info server
 public class LeaderInfoHandler extends leaderInfoCommunicationGrpc.leaderInfoCommunicationImplBase {
     private LeaderInfoBackend leaderInfoBackend;
     public LeaderInfoHandler() {

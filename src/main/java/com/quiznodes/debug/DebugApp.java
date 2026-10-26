@@ -5,6 +5,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
+//Starts the debugger
 public class DebugApp extends Application {
 
     @Override
