@@ -7,6 +7,7 @@ import com.quiznodes.proto.serviceHandlerGrpc;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 
+//Used for communicating with the leader info server
 public class LeaderInfoCommunication {
     private final ManagedChannel channel;
     private final leaderInfoCommunicationGrpc.leaderInfoCommunicationBlockingStub blockingStub;

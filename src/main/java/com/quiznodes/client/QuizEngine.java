@@ -2,6 +2,7 @@ package com.quiznodes.client;
 
 import com.quiznodes.server.types.*;
 
+//Backend for interacting with quizzes
 public class QuizEngine {
     private Quiz currentQuiz;
     private int progress = 1;
