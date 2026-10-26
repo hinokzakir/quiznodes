@@ -42,7 +42,7 @@ java -cp target/quiznodes-1.0.jar com.quiznodes.info.LeaderInfoServer
 
 If you want to monitor the cluster, launch the debugger before starting server nodes:
 ```bash
-java -cp target/quiznodes-1.0.jar com.quiznodes.debug.DebugServer
+java -cp target/quiznodes-1.0.jar com.quiznodes.debug.DebugLauncher
 ```
 Note that you can not use the debugger to start the first server, it has to be started manually
 
@@ -57,5 +57,5 @@ java -cp target/quiznodes-1.0.jar com.quiznodes.ServerApp
 
 Launch the client application:
 ```bash
-java -cp target/quiznodes-1.0.jar com.quiznodes.App
+java -cp target/quiznodes-1.0.jar com.quiznodes.Launcher
 ```
