@@ -21,6 +21,6 @@ public class DebugServer {
     }
 
     public static void main(String[] args) throws IOException, InterruptedException {
-        DebugServer debugServer =  new DebugServer("localhost", 1112, new DebugController());
+        DebugServer debugServer =  new DebugServer("localhost", 1201, new DebugController());
     }
 }

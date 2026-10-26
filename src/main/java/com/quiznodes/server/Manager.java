@@ -40,7 +40,7 @@ public class Manager {
         serverBackend = new ServerBackend(max_capacity);
         server = new ServerNode(port, this);
         leaderInfoCommunication = new LeaderInfoCommunication("localhost", 1337);
-        debugCommunication = new DebugCommunication("localhost", 1112);
+        debugCommunication = new DebugCommunication("localhost", 1201);
         this.electionHandler = new ElectionHandler(0);
         if (!isLeader) {
             this.state = 2;

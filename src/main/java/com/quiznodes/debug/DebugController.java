@@ -51,7 +51,7 @@ public class DebugController {
     private void initialize() {
         Thread serverThread = new Thread(() -> {
             try {
-                server = new DebugServer("localhost", 1112, this);
+                server = new DebugServer("localhost", 1201, this);
             } catch (IOException | InterruptedException e) {
                 e.printStackTrace();
             }
