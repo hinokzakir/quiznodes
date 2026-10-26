@@ -44,6 +44,7 @@ If you want to monitor the cluster, launch the debugger before starting server n
 ```bash
 java -cp target/quiznodes-1.0.jar com.quiznodes.debug.DebugServer
 ```
+Note that you can not use the debugger to start the first server, it has to be started manually
 
 ### 3. Server Nodes
 
