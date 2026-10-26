@@ -1,6 +1,15 @@
 # QuizNodes
 Distributed file system for quizzes in JSON format with a client to server architecture. The goal is to distribute the files between servers and load balance clients between the servers to optimize performance. Each client will be able to select a JSON file entry and then get a local GUI to actually do the quiz based on the answers and questions inside of the JSON file.
 
+## Used ports:
+| Service        | Port   |
+|----------------|--------|
+| Naming Service | 1099   |
+| Leader Info    | 1337   |
+| Debugger       | 1112   |
+| Server Node    | Random |
+| Client Node    | Random |
+
 ## Setup
 1. To install
 ```bash
@@ -14,29 +23,30 @@ mvn clean install
 mvn clean package
 ```
 
-3.1. To run Client node (GUI)
+3. 
+If the you want to debug the cluster, the debugger has to run before the cluster has started. To run the debugger:
 ```bash
-mvn exec:java
+java -cp target/quiznodes-1.0.jar com.quiznodes.debug.DebugServer
 ```
 
-3.2. To run the serverApp
+4. The cluster needs both naming service and leader info service before cluster has started.
+
+To run the naming service:
 ```bash
-mvn exec:java -Dexec.mainClass="com.quiznodes.ServerApp"
+java -cp target/quiznodes-1.0.jar com.quiznodes.namingservice.Server
 ```
 
-3.3. To run the naming service
+To run the Leader info:
 ```bash
-mvn exec:java -Dexec.mainClass="com.quiznodes.namingservice.Server"
-```
-
-3.4. To run the Leader info
-```bash
-mvn exec:java -Dexec.mainClass="com.quiznodes.info.LeaderInfoServer"
+java -cp target/quiznodes-1.0.jar com.quiznodes.info.LeaderInfoServer
 ```
 
 
-
-5. To run tests
+5. To run the serverApp:
 ```bash
-mvn test
+java -cp target/quiznodes-1.0.jar com.quiznodes.ServerApp
+```
+6. To run Client node (GUI)
+```bash
+java -cp target/quiznodes-1.0.jar com.quiznodes.App
 ```
