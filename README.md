@@ -1,52 +1,60 @@
 # QuizNodes
-Distributed file system for quizzes in JSON format with a client to server architecture. The goal is to distribute the files between servers and load balance clients between the servers to optimize performance. Each client will be able to select a JSON file entry and then get a local GUI to actually do the quiz based on the answers and questions inside of the JSON file.
 
-## Used ports:
-| Service        | Port   |
-|----------------|--------|
-| Naming Service | 1099   |
-| Leader Info    | 1337   |
-| Debugger       | 1112   |
-| Server Node    | Random |
-| Client Node    | Random |
+A distributed file system for quizzes in JSON format. Quizzes are replicated across server nodes with dynamic capacity management, and clients connect through a desktop GUI to browse, upload, and take quizzes.
 
-## Setup
-1. To install
-```bash
-cd quiznodes
-mvn clean install
+## Ports
 
-```
+| Service | Port | Protocol | Description |
+|---|---|---|---|
+| Naming Service | `1099` | Java RMI | Node registry and cluster discovery |
+| Leader Info | `1337` | gRPC | Tracks active leader node endpoint |
+| Debugger | `1112` | gRPC | Cluster monitoring tool (optional) |
+| Server Nodes | Dynamic | gRPC | Inter-server replication & client API |
+| Client Nodes | Dynamic | gRPC | JavaFX desktop client |
 
-2. To compile
+## Build
+
+Build the project and fat JAR:
+
 ```bash
 mvn clean package
 ```
 
-3. 
-If the you want to debug the cluster, the debugger has to run before the cluster has started. To run the debugger:
-```bash
-java -cp target/quiznodes-1.0.jar com.quiznodes.debug.DebugServer
-```
+The executable JAR is created at `target/quiznodes-1.0.jar`.
 
-4. The cluster needs both naming service and leader info service before cluster has started.
+## Running the System
 
-To run the naming service:
+Run each component in a separate terminal window, in the following order:
+
+### 1. Core Services (Start first)
+
+Start the Naming Service:
 ```bash
 java -cp target/quiznodes-1.0.jar com.quiznodes.namingservice.Server
 ```
 
-To run the Leader info:
+Start the Leader Info service:
 ```bash
 java -cp target/quiznodes-1.0.jar com.quiznodes.info.LeaderInfoServer
 ```
 
+### 2. Debugger (Optional)
 
-5. To run the serverApp:
+If you want to monitor the cluster, launch the debugger before starting server nodes:
+```bash
+java -cp target/quiznodes-1.0.jar com.quiznodes.debug.DebugServer
+```
+
+### 3. Server Nodes
+
+Start one or more server nodes. The first node to join becomes the leader, and subsequent nodes join as followers:
 ```bash
 java -cp target/quiznodes-1.0.jar com.quiznodes.ServerApp
 ```
-6. To run Client node (GUI)
+
+### 4. Client GUI
+
+Launch the client application:
 ```bash
 java -cp target/quiznodes-1.0.jar com.quiznodes.App
 ```
