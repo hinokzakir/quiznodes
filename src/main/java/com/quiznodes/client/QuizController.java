@@ -18,6 +18,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 
+//Handles interacting with the quizzes
 public class QuizController {
 
     @FXML
@@ -73,7 +74,6 @@ public class QuizController {
 
     @FXML
     private void handleNext() {
-        // calculate if correct
         if (toggleGroup != null && toggleGroup.getSelectedToggle() != null) {
             RadioButton selectedRb = (RadioButton) toggleGroup.getSelectedToggle();
             String selectedAnswer = selectedRb.getText();
@@ -106,7 +106,6 @@ public class QuizController {
 
         } else {
             System.out.println("User didn't select an answer!");
-            // You can show a warning to the user here
         }
     }
 
@@ -117,17 +116,13 @@ public class QuizController {
     }
 
     private void loadInitialState() {
-        // set lable
         quizTitleLabel.setText(quiz.getName());
 
-        // set question
         Question q = quiz.getQuestions().get(0);
         questionLabel.setText(q.getQuestion());
 
-        // set progress
         progressLabel.setText("Question " + quizEngine.getProgress() + " / " + quiz.getQuestions().size());
 
-        // choices
         List<String> choices = q.getChoices();
 
         toggleGroup = new ToggleGroup();

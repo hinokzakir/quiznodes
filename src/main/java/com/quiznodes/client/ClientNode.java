@@ -18,14 +18,13 @@ import io.grpc.ManagedChannelBuilder;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 
+//Used for communicating with the server cluster
 public class ClientNode {
     private final ManagedChannel channel;
     private final serviceHandlerGrpc.serviceHandlerBlockingStub blockingStub;
 
     public ClientNode(String host, int port) {
-        // set up connection to server
         this.channel = ManagedChannelBuilder.forAddress(host, port).usePlaintext().build();
-        // client side stub
         this.blockingStub = serviceHandlerGrpc.newBlockingStub(channel);
     }
 

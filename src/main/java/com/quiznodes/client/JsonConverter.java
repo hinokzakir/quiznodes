@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+//Used for converting quizzes in json to quiz objects
 public class JsonConverter {
     public JsonConverter(){
 
